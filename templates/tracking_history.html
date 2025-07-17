@@ -1,0 +1,104 @@
+{% extends "base.html" %} {% block content %}
+<h2>Tracked Event History</h2>
+
+<label for="filter-page">Filter by Page URL:</label>
+<input type="text" id="filter-page" placeholder="e.g. /home or full URL" />
+
+<label for="filter-action">Filter by Action:</label>
+<select id="filter-action">
+  <option value="">All</option>
+  <option value="click">Click</option>
+  <option value="submit">Submit</option>
+  <option value="hover">Hover</option>
+</select>
+
+<button onclick="applyFilters()">Apply Filters</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Page</th>
+      <th>Action</th>
+      <th>Selector</th>
+    </tr>
+  </thead>
+  <tbody id="event-table-body"></tbody>
+</table>
+<canvas id="eventChart" width="400" height="200"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  function buildChart(events) {
+    const counts = { click: 0, hover: 0, submit: 0 };
+    events.forEach((e) => {
+      if (counts[e.action] !== undefined) counts[e.action]++;
+    });
+
+    const ctx = document.getElementById("eventChart").getContext("2d");
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: Object.keys(counts),
+        datasets: [
+          {
+            label: "# of Events",
+            data: Object.values(counts),
+            backgroundColor: ["#4caf50", "#2196f3", "#ff9800"],
+          },
+        ],
+      },
+    });
+  }
+
+  // Call after load
+  async function loadEvents() {
+    const res = await fetch("/get_events");
+    allEvents = await res.json();
+    renderTable(allEvents);
+    buildChart(allEvents);
+  }
+</script>
+
+<script>
+  let allEvents = [];
+
+  async function loadEvents() {
+    const res = await fetch("/get_events");
+    allEvents = await res.json();
+    renderTable(allEvents);
+  }
+
+  function applyFilters() {
+    const pageFilter = document
+      .getElementById("filter-page")
+      .value.toLowerCase();
+    const actionFilter = document.getElementById("filter-action").value;
+
+    const filtered = allEvents.filter((event) => {
+      return (
+        (!pageFilter || event.page_url.toLowerCase().includes(pageFilter)) &&
+        (!actionFilter || event.action === actionFilter)
+      );
+    });
+
+    renderTable(filtered);
+  }
+
+  function renderTable(events) {
+    const body = document.getElementById("event-table-body");
+    body.innerHTML = "";
+    events.forEach((ev) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+          <td>${ev.timestamp || "-"}</td>
+          <td>${ev.page_url}</td>
+          <td>${ev.action}</td>
+          <td>${ev.selector}</td>
+        `;
+      body.appendChild(row);
+    });
+  }
+
+  loadEvents();
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %} {% block content %}
+<div class="welcome-container">
+  <h1>👋 Welcome to Webflow Tracker</h1>
+  <p>Start by selecting what you'd like to do:</p>
+
+  <div class="card-grid">
+    <a href="/tracking_rule" class="card">
+      <h3>🎯 Set Tracking Rule</h3>
+      <p>Define actions to track on your Webflow site.</p>
+    </a>
+
+    <a href="/tracking_history" class="card">
+      <h3>📊 Track Events</h3>
+      <p>View all recorded user events on your site.</p>
+    </a>
+
+    <a href="/setup_page" class="card">
+      <h3>⚙️ Edit Setup</h3>
+      <p>Update your Webflow URL or connected pages.</p>
+    </a>
+  </div>
+</div>
+{% endblock %}

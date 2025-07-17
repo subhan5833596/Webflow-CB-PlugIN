@@ -1,0 +1,104 @@
+{% extends "base.html" %} {% block content %}
+<h2>🔧 Connect Your Webflow Site</h2>
+
+<form id="webflow-setup-form">
+  <label for="webflow-url">Webflow Site URL</label>
+  <input
+    type="url"
+    id="webflow-url"
+    name="webflow-url"
+    placeholder="https://your-site.webflow.io"
+    required
+  />
+
+  <button type="button" id="fetch-pages-btn">🔍 Fetch Pages</button>
+
+  <div id="pages-wrapper" style="display: none; margin-top: 20px">
+    <label for="pages-dropdown">Pages Found</label>
+    <select id="pages-dropdown" style="width: 300px"></select>
+
+    <button type="submit" id="generate-script-btn" style="margin-top: 15px">
+      ➕ Generate Script
+    </button>
+  </div>
+</form>
+
+<!-- Modal -->
+<div id="script-modal" class="modal" style="display: none">
+  <div class="modal-content">
+    <span class="close-button" onclick="closeModal()">×</span>
+    <h3>✅ Your Tracking Script</h3>
+    <p>
+      Paste this code before the closing <code>&lt;/body&gt;</code> tag on every
+      page of your Webflow site, or in the <strong>Footer Code</strong> section
+      inside Webflow Project Settings.
+    </p>
+    <pre id="generated-script" class="script-box"></pre>
+    <button type="button" onclick="copyScript()">📋 Copy to Clipboard</button>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const webflowInput = document.getElementById("webflow-url");
+    const fetchBtn = document.getElementById("fetch-pages-btn");
+    const pagesWrapper = document.getElementById("pages-wrapper");
+    const pagesDropdown = document.getElementById("pages-dropdown");
+    const generateBtn = document.getElementById("generate-script-btn");
+    const scriptModal = document.getElementById("script-modal");
+    const scriptDisplay = document.getElementById("generated-script");
+
+    fetchBtn.addEventListener("click", async () => {
+      const siteUrl = webflowInput.value.trim();
+      if (!siteUrl.startsWith("http")) {
+        alert("Please enter a valid Webflow URL.");
+        return;
+      }
+
+      const res = await fetch("/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ webflow_url: siteUrl }),
+      });
+
+      const result = await res.json();
+      if (!result.pages || result.pages.length === 0) {
+        alert("No pages found.");
+        return;
+      }
+
+      pagesDropdown.innerHTML = "";
+      result.pages.forEach((p) => {
+        const opt = document.createElement("option");
+        opt.value = p.url;
+        opt.textContent = p.label;
+        pagesDropdown.appendChild(opt);
+      });
+
+      pagesWrapper.style.display = "block";
+    });
+
+    document
+      .getElementById("webflow-setup-form")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+        const siteUrl = webflowInput.value.trim();
+        const script = `<script src="https://yourdomain.com/static/tracker.js" data-site="${siteUrl}"><\/script>`;
+        scriptDisplay.innerText = script;
+        scriptModal.style.display = "flex";
+      });
+
+    window.copyScript = function () {
+      const text = scriptDisplay.innerText;
+      navigator.clipboard
+        .writeText(text)
+        .then(() => alert("✅ Script copied!"))
+        .catch(() => alert("❌ Failed to copy."));
+    };
+
+    window.closeModal = function () {
+      scriptModal.style.display = "none";
+    };
+  });
+</script>
+{% endblock %}

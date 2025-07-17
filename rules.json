@@ -1,0 +1,97 @@
+[
+  {
+    "website_url": "http://127.0.0.1:5000/",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "click",
+    "timestamp": "2025-07-09T09:17:37.719461Z"
+  },
+  {
+    "website_url": "http://127.0.0.1:5000/",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "hover",
+    "timestamp": "2025-07-09T09:18:47.962836Z"
+  },
+  {
+    "website_url": "http://127.0.0.1:5000/",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "button",
+    "action": "click",
+    "timestamp": "2025-07-09T09:30:08.633593Z"
+  },
+  {
+    "website_url": "http://127.0.0.1:5000/",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "html:nth-of-type(1) > body:nth-of-type(1) > header:nth-of-type(1) > nav:nth-of-type(1) > a:nth-of-type(1)",
+    "action": "click",
+    "timestamp": "2025-07-09T09:33:12.289840Z"
+  },
+  {
+    "website_url": "http://127.0.0.1:5000/",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "html:nth-of-type(1) > body:nth-of-type(1) > main:nth-of-type(1) > button:nth-of-type(1)",
+    "action": "click",
+    "timestamp": "2025-07-09T09:37:57.367467Z"
+  },
+  {
+    "rule_id": "6aa95012-1752-4253-95e3-302843dd6001",
+    "created_at": "2025-07-10T13:23:27.076740Z",
+    "website_url": "http://127.0.0.1:5000/",
+    "page_url": "",
+    "action": "click",
+    "selector": "",
+    "element_text": "",
+    "element_tag": "",
+    "element_id": "",
+    "element_classes": ""
+  },
+  {
+    "rule_id": "c7732180-8d94-4152-8d93-fae4e71503a2",
+    "created_at": "2025-07-10T13:23:29.448030Z",
+    "website_url": "http://127.0.0.1:5000/",
+    "page_url": "http://127.0.0.1:5000/",
+    "action": "click",
+    "selector": "html:nth-of-type(1) > body:nth-of-type(1) > nav:nth-of-type(1) > a:nth-of-type(1)",
+    "element_text": "Dashboard",
+    "element_tag": "a",
+    "element_id": "",
+    "element_classes": ""
+  },
+  {
+    "rule_id": "8e1c46e7-a0d7-42da-a15f-d26d77cbbcac",
+    "created_at": "2025-07-10T13:23:36.459761Z",
+    "website_url": "http://127.0.0.1:5000/",
+    "page_url": "",
+    "action": "click",
+    "selector": "",
+    "element_text": "",
+    "element_tag": "",
+    "element_id": "",
+    "element_classes": ""
+  },
+  {
+    "rule_id": "4f4c9ef6-5257-4d7a-8722-f78e4f4b9710",
+    "created_at": "2025-07-10T13:23:49.045291Z",
+    "website_url": "http://127.0.0.1:5000/",
+    "page_url": "",
+    "action": "click",
+    "selector": "",
+    "element_text": "",
+    "element_tag": "",
+    "element_id": "",
+    "element_classes": ""
+  },
+  {
+    "rule_id": "0121e326-ae05-4449-bd52-a5ba71cfba1f",
+    "created_at": "2025-07-10T13:25:10.931972Z",
+    "website_url": "http://127.0.0.1:5000/",
+    "page_url": "http://127.0.0.1:5000/setup_page",
+    "action": "click",
+    "selector": "#fetch-pages-btn",
+    "element_text": "\ud83d\udd0d Fetch Pages",
+    "element_tag": "button",
+    "element_id": "fetch-pages-btn",
+    "element_classes": ""
+  }
+]

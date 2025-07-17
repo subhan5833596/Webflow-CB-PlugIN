@@ -1,0 +1,13 @@
+{
+  "webflow_url": "http://127.0.0.1:5000/",
+  "pages": [
+    {
+      "label": "Dashboard",
+      "url": "http://127.0.0.1:5000/"
+    },
+    {
+      "label": "Tracking History",
+      "url": "http://127.0.0.1:5000/tracking_history"
+    }
+  ]
+}

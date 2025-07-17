@@ -1,0 +1,92 @@
+[
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-09T09:24:35.338Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-09T09:26:53.349Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-09T09:26:56.133Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-09T09:26:57.402Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-09T09:28:18.725Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "button",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-09T09:30:47.920Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-09T09:30:49.570Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-09T09:30:56.275Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-09T09:43:34.340Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_history",
+    "selector": "a",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-09T09:43:36.512Z"
+  }
+]

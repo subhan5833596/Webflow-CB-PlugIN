@@ -1,0 +1,87 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-2">
+  <h2 class="mb-4">🎯 Setup Tracking Rule</h2>
+
+  <form id="tracking-form">
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="website-url" class="form-label">🌐 Website URL</label>
+        <input
+          type="url"
+          class="form-control"
+          id="website-url"
+          placeholder="https://your-site.com"
+          required
+        />
+        <button id="load-pages-btn">Load Pages</button>
+      </div>
+      <div class="col-md-6">
+        <label for="page-url" class="form-label">📄 Page URL</label>
+        <select id="page-url" class="form-select"></select>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="selector" class="form-label">🔍 Element to Track</label>
+        <select id="selector" class="form-select"></select>
+      </div>
+      <div class="col-md-6">
+        <label for="action" class="form-label">⚙️ Event Type</label>
+        <select id="action" class="form-select">
+          <option value="click">Click</option>
+          <option value="submit">Form Submit</option>
+          <option value="hover">Hover</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="element-text" class="form-label">📎 Element Text</label>
+        <input type="text" id="element-text" class="form-control" readonly />
+      </div>
+      <div class="col-md-6">
+        <label for="element-tag" class="form-label">🏷️ Tag Name</label>
+        <input type="text" id="element-tag" class="form-control" readonly />
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="element-id" class="form-label">🆔 Element ID</label>
+        <input type="text" id="element-id" class="form-control" readonly />
+      </div>
+      <div class="col-md-6">
+        <label for="element-classes" class="form-label"
+          >🎨 Element Classes</label
+        >
+        <input type="text" id="element-classes" class="form-control" readonly />
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary mb-4">
+      ➕ Add Tracking Rule
+    </button>
+  </form>
+
+  <div>
+    <h4>📊 Active Tracking Rules</h4>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Website</th>
+          <th>Page</th>
+          <th>Action</th>
+          <th>Selector</th>
+          <th>Timestamp</th>
+          <th>❌</th>
+        </tr>
+      </thead>
+      <tbody id="rules-table-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+{% endblock %}
