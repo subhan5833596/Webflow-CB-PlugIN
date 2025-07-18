@@ -132,11 +132,22 @@ def add_rule():
 @app.route("/get_rules")
 def get_rules():
     try:
-        with open("rules.json", "r") as f:
+        rules_path = os.path.join(os.path.dirname(__file__), "rules.json")
+        with open(rules_path, "r") as f:
             rules = json.load(f)
-    except:
+    except Exception as e:
+        print("Error reading rules:", e)
         rules = []
     return jsonify(rules)
+
+# @app.route("/get_rules")
+# def get_rules():
+#     try:
+#         with open("rules.json", "r") as f:
+#             rules = json.load(f)
+#     except:
+#         rules = []
+#     return jsonify(rules)
 
 import os
 
