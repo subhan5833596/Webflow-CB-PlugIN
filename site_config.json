@@ -1,13 +1,165 @@
 {
-  "webflow_url": "http://127.0.0.1:5000/",
+  "webflow_url": "https://www.birchtech.com/",
   "pages": [
     {
-      "label": "Dashboard",
-      "url": "http://127.0.0.1:5000/"
+      "label": "https://www.birchtech.com/",
+      "url": "https://www.birchtech.com/"
     },
     {
-      "label": "Tracking History",
-      "url": "http://127.0.0.1:5000/tracking_history"
+      "label": "Company Overview",
+      "url": "https://www.birchtech.com/about-us"
+    },
+    {
+      "label": "Our Leadership",
+      "url": "https://www.birchtech.com/our-leadership"
+    },
+    {
+      "label": "Board of Directors",
+      "url": "https://www.birchtech.com/board-of-directors"
+    },
+    {
+      "label": "Overview",
+      "url": "https://www.birchtech.com/tech-overview"
+    },
+    {
+      "label": "Clean Air",
+      "url": "https://www.birchtech.com/clean-air"
+    },
+    {
+      "label": "Clean Water",
+      "url": "https://www.birchtech.com/clean-water"
+    },
+    {
+      "label": "Smart Carbon Management",
+      "url": "https://www.birchtech.com/design-centers"
+    },
+    {
+      "label": "Water Treatment Solutions",
+      "url": "https://www.birchtech.com/water-treatment"
+    },
+    {
+      "label": "Articles",
+      "url": "https://www.birchtech.com/articles"
+    },
+    {
+      "label": "Latest Industry Updates",
+      "url": "https://www.birchtech.com/latest-industry-updates"
+    },
+    {
+      "label": "Contact Us",
+      "url": "https://www.birchtech.com/contact-us"
+    },
+    {
+      "label": "About Us",
+      "url": "https://www.birchtech.com/about-us"
+    },
+    {
+      "label": "Our Leadership",
+      "url": "https://www.birchtech.com/our-leadership"
+    },
+    {
+      "label": "Board of Directors",
+      "url": "https://www.birchtech.com/board-of-directors"
+    },
+    {
+      "label": "Overview",
+      "url": "https://www.birchtech.com/tech-overview"
+    },
+    {
+      "label": "Clean Air",
+      "url": "https://www.birchtech.com/clean-air"
+    },
+    {
+      "label": "Clean Water",
+      "url": "https://www.birchtech.com/clean-water"
+    },
+    {
+      "label": "Smart Carbon Management",
+      "url": "https://www.birchtech.com/design-centers"
+    },
+    {
+      "label": "Water Treatment Solutions",
+      "url": "https://www.birchtech.com/water-treatment"
+    },
+    {
+      "label": "Articles",
+      "url": "https://www.birchtech.com/articles"
+    },
+    {
+      "label": "Latest Industry Updates",
+      "url": "https://www.birchtech.com/latest-industry-updates"
+    },
+    {
+      "label": "Contact us",
+      "url": "https://www.birchtech.com/contact-us"
+    },
+    {
+      "label": "Learn More",
+      "url": "https://www.birchtech.com/tech-overview"
+    },
+    {
+      "label": "REGULATORY UPDATEDepartment of Energy Re",
+      "url": "https://www.birchtech.com/press-release-and-article/department-of-energy-releases-report-on-evaluating-u-s-grid-reliability-and-security"
+    },
+    {
+      "label": "Regulatory UpdateUS Court of DE Issues M",
+      "url": "https://www.birchtech.com/press-release-and-article/us-court-of-de-issues-memorandum-opinion-on-june-10th-2025"
+    },
+    {
+      "label": "PRESS RELEASEBirchtech Strengthens Water",
+      "url": "https://www.birchtech.com/press-release-and-article/birchtech-strengthens-water-treatment-commercialization-team-with-strategic-leadership-appointments"
+    },
+    {
+      "label": "REGULATORY UPDATEAdministrator Zeldin An",
+      "url": "https://www.birchtech.com/press-release-and-article/administrator-zeldin-announces-major-epa-actions-to-combat-pfas-contamination"
+    },
+    {
+      "label": "Discover More",
+      "url": "https://www.birchtech.com/latest-industry-updates"
+    },
+    {
+      "label": "About us",
+      "url": "https://www.birchtech.com/about-us"
+    },
+    {
+      "label": "Mercury Emission ControlLearn more",
+      "url": "https://www.birchtech.com/clean-air"
+    },
+    {
+      "label": "Water PurificationLearn more",
+      "url": "https://www.birchtech.com/clean-water"
+    },
+    {
+      "label": "Get In Touch",
+      "url": "https://www.birchtech.com/contact-us"
+    },
+    {
+      "label": "Technology",
+      "url": "https://www.birchtech.com/tech-overview"
+    },
+    {
+      "label": "Design Centers",
+      "url": "https://www.birchtech.com/design-centers"
+    },
+    {
+      "label": "News",
+      "url": "https://www.birchtech.com/articles"
+    },
+    {
+      "label": "Contact Us",
+      "url": "https://www.birchtech.com/contact-us"
+    },
+    {
+      "label": "Privacy Policy",
+      "url": "https://www.birchtech.com/privacy-policy"
+    },
+    {
+      "label": "Disclaimer",
+      "url": "https://www.birchtech.com/disclaimer"
+    },
+    {
+      "label": "Contact Us",
+      "url": "https://www.birchtech.com/contact-us"
     }
   ]
 }

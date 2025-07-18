@@ -1,6 +1,8 @@
+const BACKEND_URL = "https://fire5833596.pythonanywhere.com"; // Change this
+
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const rulesRes = await fetch("/get_rules");
+    const rulesRes = await fetch(`${BACKEND_URL}/get_rules`);
     const rules = await rulesRes.json();
     const currentURL = window.location.href;
     const websiteURL = new URL(currentURL).origin;
@@ -15,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           elements.forEach((el) => {
             const track = () => {
-              fetch("/track_event", {
+              fetch(`${BACKEND_URL}/track_event`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

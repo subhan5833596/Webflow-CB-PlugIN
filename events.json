@@ -88,5 +88,41 @@
     "action": "click",
     "matched_rule": true,
     "timestamp": "2025-07-09T09:43:36.512Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/setup_page",
+    "selector": "#fetch-pages-btn",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-17T12:32:43.895Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/setup_page",
+    "selector": "html:nth-of-type(1) > body:nth-of-type(1) > nav:nth-of-type(1) > a:nth-of-type(1)",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-17T12:43:37.737Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/tracking_rule",
+    "selector": "html:nth-of-type(1) > body:nth-of-type(1) > nav:nth-of-type(1) > a:nth-of-type(1)",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-17T17:31:11.611Z"
+  },
+  {
+    "user": "anonymous",
+    "website_url": "http://127.0.0.1:5000",
+    "page_url": "http://127.0.0.1:5000/setup_page",
+    "selector": "#fetch-pages-btn",
+    "action": "click",
+    "matched_rule": true,
+    "timestamp": "2025-07-17T17:31:15.267Z"
   }
 ]
