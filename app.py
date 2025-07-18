@@ -4,9 +4,10 @@ import uuid
 from flask import Flask, render_template, request, jsonify
 import os
 import json
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+CORS(app)
 # Ensure data files exist
 for f in ["rules.json", "events.json"]:
     if not os.path.exists(f):
