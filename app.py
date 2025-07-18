@@ -194,16 +194,37 @@ def track_event():
 #     except Exception as e:
 #         return jsonify({"error": str(e)}), 500
 
+# @app.route("/get_events")
+# def get_events():
+#     try:
+#         with open("events.json", "r") as f:
+#             try:
+#                 events = json.load(f)
+#             except json.JSONDecodeError:
+#                 events = []
+#     except FileNotFoundError:
+#         events = []
+#     return jsonify(events)
+
 @app.route("/get_events")
 def get_events():
+    import os
+    import json
+
     try:
-        with open("events.json", "r") as f:
+        events_path = os.path.join(os.path.dirname(__file__), "events.json")
+
+        if not os.path.exists(events_path):
+            return jsonify([])
+
+        with open(events_path, "r") as f:
             try:
                 events = json.load(f)
             except json.JSONDecodeError:
                 events = []
-    except FileNotFoundError:
-        events = []
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
     return jsonify(events)
 
 @app.route("/delete_rule/<int:index>", methods=["DELETE"])
