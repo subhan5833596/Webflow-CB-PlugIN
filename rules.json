@@ -10,5 +10,29 @@
     "element_tag": "",
     "element_id": "",
     "element_classes": ""
+  },
+  {
+    "rule_id": "7120d680-3d11-4bc2-a57e-b846a8165bf3",
+    "created_at": "2025-07-18T20:03:35.016518Z",
+    "website_url": "https://www.birchtech.com/",
+    "page_url": "",
+    "action": "click",
+    "selector": "",
+    "element_text": "",
+    "element_tag": "",
+    "element_id": "",
+    "element_classes": ""
+  },
+  {
+    "rule_id": "e44136bd-a263-4102-acd1-6d41f161854e",
+    "created_at": "2025-07-18T20:05:09.882507Z",
+    "website_url": "https://www.birchtech.com/",
+    "page_url": "https://www.birchtech.com/contact-us",
+    "action": "click",
+    "selector": "html:nth-of-type(1) > body:nth-of-type(1) > section.contact-form-grid:nth-of-type(2) > div.w-layout-blockcontainer.container-large-5.ctact.w-container:nth-of-type(1) > div.w-layout-grid.grid-54:nth-of-type(1) > div.form-wrap-2:nth-of-type(1) > div.form-block-4.w-form:nth-of-type(1) > form.form-2:nth-of-type(1) > input.submit-button-3.w-button:nth-of-type(5)",
+    "element_text": "Submit",
+    "element_tag": "input",
+    "element_id": "",
+    "element_classes": "submit-button-3 w-button"
   }
 ]
