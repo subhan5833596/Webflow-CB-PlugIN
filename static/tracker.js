@@ -1,6 +1,6 @@
-const BACKEND_URL = "https://fire5833596.pythonanywhere.com"; // Change this
+const BACKEND_URL = "https://fire5833596.pythonanywhere.com"; // Your backend URL
 
-document.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener("load", async () => {
   try {
     const rulesRes = await fetch(`${BACKEND_URL}/get_rules`);
     const rules = await rulesRes.json();
@@ -11,12 +11,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (currentURL.includes(rule.page_url)) {
         try {
           const elements = document.querySelectorAll(rule.selector);
+
           if (!elements.length) {
             console.warn("⚠️ No elements matched:", rule.selector);
+            return;
           }
 
           elements.forEach((el) => {
-            const track = () => {
+            const handleEvent = (e) => {
+              console.log(`📌 Tracking: ${rule.action} on`, rule.selector);
+
+              if (
+                rule.action === "click" &&
+                el.tagName === "INPUT" &&
+                el.type === "submit"
+              ) {
+                e.preventDefault(); // Stop form submission
+              }
+
               fetch(`${BACKEND_URL}/track_event`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -29,17 +41,27 @@ document.addEventListener("DOMContentLoaded", async () => {
                   matched_rule: true,
                   timestamp: new Date().toISOString(),
                 }),
+              }).finally(() => {
+                // If it was a submit button, submit form manually
+                if (
+                  rule.action === "click" &&
+                  el.tagName === "INPUT" &&
+                  el.type === "submit" &&
+                  el.form
+                ) {
+                  el.form.submit();
+                }
               });
             };
 
-            el.addEventListener(rule.action, track, true);
+            el.addEventListener(rule.action, handleEvent, true); // Use capture phase
           });
         } catch (err) {
-          console.error("Failed to attach:", rule, err);
+          console.error("❌ Error attaching rule:", rule, err);
         }
       }
     });
   } catch (err) {
-    console.error("Failed to fetch rules:", err);
+    console.error("❌ Failed to fetch rules:", err);
   }
 });
