@@ -137,24 +137,50 @@ def get_rules():
         rules = []
     return jsonify(rules)
 
+import os
 
 @app.route("/track_event", methods=["POST"])
 def track_event():
     try:
         data = request.get_json()
-        with open("events.json", "r") as f:
-            try:
-                events = json.load(f)
-            except:
-                events = []
+        events_file_path = os.path.join(os.path.dirname(__file__), "events.json")
+
+        # If file doesn't exist, create an empty list
+        if not os.path.exists(events_file_path):
+            events = []
+        else:
+            with open(events_file_path, "r") as f:
+                try:
+                    events = json.load(f)
+                except json.JSONDecodeError:
+                    events = []
 
         events.append(data)
-        with open("events.json", "w") as f:
+
+        with open(events_file_path, "w") as f:
             json.dump(events, f, indent=2)
 
         return jsonify({"message": "Event tracked successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# @app.route("/track_event", methods=["POST"])
+# def track_event():
+#     try:
+#         data = request.get_json()
+#         with open("events.json", "r") as f:
+#             try:
+#                 events = json.load(f)
+#             except:
+#                 events = []
+
+#         events.append(data)
+#         with open("events.json", "w") as f:
+#             json.dump(events, f, indent=2)
+
+#         return jsonify({"message": "Event tracked successfully"}), 200
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 @app.route("/get_events")
 def get_events():
