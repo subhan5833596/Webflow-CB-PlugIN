@@ -34,5 +34,17 @@
     "element_tag": "input",
     "element_id": "",
     "element_classes": "submit-button-3 w-button"
+  },
+  {
+    "rule_id": "c45197d6-32aa-4aa6-b0fe-e9cbc1de2cbc",
+    "created_at": "2025-07-18T20:14:57.030452Z",
+    "website_url": "https://www.birchtech.com/",
+    "page_url": "https://www.birchtech.com/",
+    "action": "click",
+    "selector": "html:nth-of-type(1) > body.body:nth-of-type(1) > div.page-wrapper:nth-of-type(2) > div:nth-of-type(1) > section.footer-main-2.footer-updated:nth-of-type(1) > div.w-layout-blockcontainer.container-large-5.w-container:nth-of-type(1) > div.row-second-wrap-2:nth-of-type(1) > div.w-layout-grid.grid-02-2:nth-of-type(1) > div.links-wrap-2.follow-copy:nth-of-type(4) > div.link-list-2:nth-of-type(1) > div.form-block-3.w-form:nth-of-type(1) > form.form-3:nth-of-type(1) > input.btn-white.hero-btn-copy.form.w-button:nth-of-type(2)",
+    "element_text": "Submit",
+    "element_tag": "input",
+    "element_id": "",
+    "element_classes": "btn-white hero-btn-copy form w-button"
   }
 ]
