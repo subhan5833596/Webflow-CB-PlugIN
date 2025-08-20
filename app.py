@@ -370,10 +370,12 @@ def setup():
     data = request.get_json()
     site_url = data.get("webflow_url")
 
-    # Pehle check kar lo site_config.json exist karta h ya nahi
     import os
-    if os.path.exists("site_config.json"):
-        with open("site_config.json", "r") as f:
+    config_path = os.path.join(app.static_folder, "site_config.json")
+
+    # Pehle check kar lo site_config.json exist karta h ya nahi
+    if os.path.exists(config_path):
+        with open(config_path, "r", encoding="utf-8") as f:
             try:
                 existing_data = json.load(f)
                 if existing_data.get("webflow_url") == site_url:
@@ -409,7 +411,8 @@ def setup():
             "pages": pages
         }
 
-        with open("site_config.json", "w") as f:
+        # ✅ ab static folder me save hoga
+        with open(config_path, "w", encoding="utf-8") as f:
             json.dump(site_data, f, indent=2)
 
         return jsonify({"message": "Setup saved", "pages": pages})
