@@ -292,6 +292,8 @@ def get_selector(tag):
     
 
 
+RULES_FILE = os.path.join(app.root_path, "static", "rules.json")
+
 @app.route("/add_rule", methods=["POST"])
 def add_rule():
     data = request.get_json()
@@ -308,28 +310,33 @@ def add_rule():
         "element_classes": data.get("element_classes", "")
     }
 
-    try:
-        with open("rules.json", "r") as f:
-            rules = json.load(f)
-    except FileNotFoundError:
-        rules = []
+    # Load existing rules from static
+    rules = []
+    if os.path.exists(RULES_FILE):
+        with open(RULES_FILE, "r") as f:
+            try:
+                rules = json.load(f)
+            except json.JSONDecodeError:
+                pass
 
     rules.append(rule)
-    with open("rules.json", "w") as f:
+
+    # Save back to static file
+    with open(RULES_FILE, "w") as f:
         json.dump(rules, f, indent=2)
 
     return jsonify({"message": "Rule added", "rule": rule})
-
 @app.route("/get_rules")
 def get_rules():
     try:
-        rules_path = os.path.join(os.path.dirname(__file__), "rules.json")
+        rules_path = os.path.join(app.root_path, "static", "rules.json")
         with open(rules_path, "r") as f:
             rules = json.load(f)
     except Exception as e:
         print("Error reading rules:", e)
         rules = []
     return jsonify(rules)
+
 
 # @app.route("/get_rules")
 # def get_rules():
