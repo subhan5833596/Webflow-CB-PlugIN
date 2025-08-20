@@ -36,7 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
     pages.forEach((p) => {
       const option = document.createElement("option");
       option.value = p.url;
-      option.textContent = p.url.split("/").pop() || "index"; // 👈 Show 'index' if empty
+option.textContent = p.label; // 👈 use label instead of url.split
+
       pageUrlSelect.appendChild(option);
     });
 
@@ -53,27 +54,53 @@ document.addEventListener("DOMContentLoaded", () => {
     const elements = await res.json();
     selectorDropdown.innerHTML = "";
 
-    elements.forEach((el, index) => {
-      const opt = document.createElement("option");
-      opt.value = el.selector;
+    // elements.forEach((el, index) => {
+    //   const opt = document.createElement("option");
+    //   opt.value = el.selector;
 
-      const displaySelector =
-        el.selector.length > 60
-          ? el.selector.slice(0, 60) + "..."
-          : el.selector;
+    //   const displaySelector =
+    //     el.selector.length > 60
+    //       ? el.selector.slice(0, 60) + "..."
+    //       : el.selector;
 
-      opt.textContent = `${el.name} [${displaySelector}]`;
+    //   opt.textContent = `${el.name} [${displaySelector}]`;
 
-      // ✅ Add dataset fields for selection display
-      opt.dataset.index = index;
-      opt.dataset.selector = el.selector;
-      opt.dataset.text = el.name;
-      opt.dataset.tag = el.tag;
-      opt.dataset.id = el.id;
-      opt.dataset.classes = el.classes;
+    //   // ✅ Add dataset fields for selection display
+    //   opt.dataset.index = index;
+    //   opt.dataset.selector = el.selector;
+    //   opt.dataset.text = el.name;
+    //   opt.dataset.tag = el.tag;
+    //   opt.dataset.id = el.id;
+    //   opt.dataset.classes = el.classes;
 
-      selectorDropdown.appendChild(opt);
-    });
+    //   selectorDropdown.appendChild(opt);
+    // });
+  elements.forEach((el, index) => {
+  const opt = document.createElement("option");
+  opt.value = el.selector;
+
+  // ✅ Priority based label
+  let displayParts = [];
+  if (el.text) displayParts.push(`Text: "${el.text}"`);
+  if (el.tag) displayParts.push(`Tag: <${el.tag}>`);
+  if (el.name) displayParts.push(`Name: ${el.name}`);
+  if (el.id) displayParts.push(`ID: ${el.id}`);
+  if (el.classes) displayParts.push(`Class: ${el.classes}`);
+  if (el.selector) displayParts.push(`Selector: ${el.selector.slice(0, 60)}...`);
+
+  opt.textContent = displayParts.join(" | ");
+
+  // ✅ Add dataset for later use
+  opt.dataset.index = index;
+  opt.dataset.selector = el.selector;
+  opt.dataset.text = el.text;
+  opt.dataset.tag = el.tag;
+  opt.dataset.name = el.name;
+  opt.dataset.id = el.id;
+  opt.dataset.classes = el.classes;
+
+  selectorDropdown.appendChild(opt);
+});
 
     if (elements.length > 0) {
       selectorDropdown.selectedIndex = 0;

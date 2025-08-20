@@ -29,6 +29,77 @@ def tracking_history():
 from bs4 import BeautifulSoup
 import requests
 
+# @app.route("/get_elements")
+# def get_elements():
+#     page_url = request.args.get("page_url")
+#     if not page_url:
+#         return jsonify([])
+
+#     try:
+#         res = requests.get(page_url, timeout=5)
+#         soup = BeautifulSoup(res.text, "html.parser")
+#         elements = []
+
+#         for tag in soup.find_all(["a", "button", "input", "img", "div", "span"]):
+#             selector = get_selector(tag)
+#             name = (
+#                 tag.get("aria-label") or
+#                 tag.get("alt") or
+#                 tag.get("placeholder") or
+#                 tag.get("title") or
+#                 tag.get("name") or
+#                 tag.get("value") or
+#                 tag.text or
+#                 tag.get("href") or
+#                 tag.get("src") or
+#                 tag.get("id") or
+#                 tag.get("class") or
+#                 tag.name
+#             )
+
+#             if selector:
+#                 elements.append({
+#                     "name": str(name).strip()[:60],
+#                     "selector": selector,
+#                     "tag": tag.name,
+#                     "id": tag.get("id", ""),
+#                     "classes": " ".join(tag.get("class", [])),
+#                     "text": tag.get_text(strip=True)
+#                 })
+
+#         return jsonify(elements)
+
+#     except Exception as e:
+#         print("Error fetching elements:", e)
+#         return jsonify([])
+
+# def get_selector(tag):
+#     try:
+#         if tag.get("id"):
+#             return f"#{tag.get('id')}"
+
+#         path = []
+#         while tag and tag.name != "[document]":
+#             sibling_index = 1
+#             sibling = tag
+#             while sibling.previous_sibling:
+#                 sibling = sibling.previous_sibling
+#                 if sibling.name == tag.name:
+#                     sibling_index += 1
+
+#             segment = tag.name
+#             if tag.get("class"):
+#                 segment += "." + ".".join(tag.get("class"))
+#             segment += f":nth-of-type({sibling_index})"
+
+#             path.insert(0, segment)
+#             tag = tag.parent
+
+#         return " > ".join(path)
+#     except Exception as e:
+#         print("Selector generation error:", e)
+#         return None
+
 @app.route("/get_elements")
 def get_elements():
     page_url = request.args.get("page_url")
@@ -37,11 +108,19 @@ def get_elements():
 
     try:
         res = requests.get(page_url, timeout=5)
+        res.raise_for_status()
         soup = BeautifulSoup(res.text, "html.parser")
         elements = []
 
-        for tag in soup.find_all(["a", "button", "input", "img", "div", "span"]):
+        # ✅ Sirf required tags: buttons, links, forms, inputs, images, videos
+        target_tags = ["a", "button", "form", "input", "img", "video"]
+
+        for tag in soup.find_all(target_tags):
             selector = get_selector(tag)
+            if not selector:
+                continue
+
+            # Human readable name
             name = (
                 tag.get("aria-label") or
                 tag.get("alt") or
@@ -49,23 +128,21 @@ def get_elements():
                 tag.get("title") or
                 tag.get("name") or
                 tag.get("value") or
-                tag.text or
                 tag.get("href") or
                 tag.get("src") or
                 tag.get("id") or
-                tag.get("class") or
+                " ".join(tag.get("class", [])) or
                 tag.name
             )
 
-            if selector:
-                elements.append({
-                    "name": str(name).strip()[:60],
-                    "selector": selector,
-                    "tag": tag.name,
-                    "id": tag.get("id", ""),
-                    "classes": " ".join(tag.get("class", [])),
-                    "text": tag.get_text(strip=True)
-                })
+            elements.append({
+                "name": str(name).strip()[:60],
+                "selector": selector,
+                "tag": tag.name,
+                "id": tag.get("id", ""),
+                "classes": " ".join(tag.get("class", [])),
+                "text": tag.get_text(strip=True)
+            })
 
         return jsonify(elements)
 
@@ -73,8 +150,11 @@ def get_elements():
         print("Error fetching elements:", e)
         return jsonify([])
 
+
 def get_selector(tag):
+    """Generate CSS selector for element"""
     try:
+        # If ID exists → use directly
         if tag.get("id"):
             return f"#{tag.get('id')}"
 
@@ -249,12 +329,63 @@ def setup_page():
     return render_template("setup.html")
 
 
+# @app.route("/setup", methods=["POST"])
+# def setup():
+#     data = request.get_json()
+#     site_url = data.get("webflow_url")
+
+#     # Extract pages from site
+#     try:
+#         res = requests.get(site_url, timeout=10)
+#         soup = BeautifulSoup(res.text, "html.parser")
+
+#         from urllib.parse import urljoin
+
+#         pages = []
+#         for tag in soup.find_all("a", href=True):
+#             href = tag['href']
+#             if href.startswith("#") or "mailto:" in href or (href.startswith("http") and site_url not in href):
+#                 continue
+#             full_url = urljoin(site_url, href)
+#             label = tag.get_text(strip=True) or full_url
+#             pages.append({
+#                 "label": label[:40],
+#                 "url": full_url
+#             })
+
+#         site_data = {
+#             "webflow_url": site_url,
+#             "pages": pages
+#         }
+
+#         with open("site_config.json", "w") as f:
+#             json.dump(site_data, f, indent=2)
+
+#         return jsonify({"message": "Setup saved", "pages": pages})
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
 @app.route("/setup", methods=["POST"])
 def setup():
     data = request.get_json()
     site_url = data.get("webflow_url")
 
-    # Extract pages from site
+    # Pehle check kar lo site_config.json exist karta h ya nahi
+    import os
+    if os.path.exists("site_config.json"):
+        with open("site_config.json", "r") as f:
+            try:
+                existing_data = json.load(f)
+                if existing_data.get("webflow_url") == site_url:
+                    # ✅ Already exist, no need to fetch again
+                    return jsonify({
+                        "message": "Website already exists",
+                        "pages": existing_data.get("pages", [])
+                    })
+            except json.JSONDecodeError:
+                pass  # agar file corrupt ho toh fresh scrape karenge
+
+    # Agar file exist nahi karti ya url different hai toh scrape karo
     try:
         res = requests.get(site_url, timeout=10)
         soup = BeautifulSoup(res.text, "html.parser")
@@ -284,6 +415,7 @@ def setup():
         return jsonify({"message": "Setup saved", "pages": pages})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/get_site_config", methods=["GET"])
 def get_site_config():

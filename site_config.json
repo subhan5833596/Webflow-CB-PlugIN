@@ -1,165 +1,153 @@
 {
-  "webflow_url": "https://www.birchtech.com/",
+  "webflow_url": "https://skynout.com/",
   "pages": [
     {
-      "label": "https://www.birchtech.com/",
-      "url": "https://www.birchtech.com/"
+      "label": "https://skynout.com/",
+      "url": "https://skynout.com/"
     },
     {
-      "label": "Company Overview",
-      "url": "https://www.birchtech.com/about-us"
+      "label": "Home",
+      "url": "https://skynout.com/"
     },
     {
-      "label": "Our Leadership",
-      "url": "https://www.birchtech.com/our-leadership"
+      "label": "About",
+      "url": "https://skynout.com/about/"
     },
     {
-      "label": "Board of Directors",
-      "url": "https://www.birchtech.com/board-of-directors"
+      "label": "Services",
+      "url": "https://skynout.com/services/"
     },
     {
-      "label": "Overview",
-      "url": "https://www.birchtech.com/tech-overview"
+      "label": "Portfolio",
+      "url": "https://skynout.com/portfolio/"
     },
     {
-      "label": "Clean Air",
-      "url": "https://www.birchtech.com/clean-air"
+      "label": "Blogs",
+      "url": "https://skynout.com/blogs/"
     },
     {
-      "label": "Clean Water",
-      "url": "https://www.birchtech.com/clean-water"
+      "label": "Contact",
+      "url": "https://skynout.com/contact-us/"
     },
     {
-      "label": "Smart Carbon Management",
-      "url": "https://www.birchtech.com/design-centers"
+      "label": "https://skynout.com/",
+      "url": "https://skynout.com/"
     },
     {
-      "label": "Water Treatment Solutions",
-      "url": "https://www.birchtech.com/water-treatment"
+      "label": "Home",
+      "url": "https://skynout.com/"
     },
     {
-      "label": "Articles",
-      "url": "https://www.birchtech.com/articles"
+      "label": "About",
+      "url": "https://skynout.com/about/"
     },
     {
-      "label": "Latest Industry Updates",
-      "url": "https://www.birchtech.com/latest-industry-updates"
+      "label": "Services",
+      "url": "https://skynout.com/services/"
     },
     {
-      "label": "Contact Us",
-      "url": "https://www.birchtech.com/contact-us"
+      "label": "Portfolio",
+      "url": "https://skynout.com/portfolio/"
     },
     {
-      "label": "About Us",
-      "url": "https://www.birchtech.com/about-us"
+      "label": "Blogs",
+      "url": "https://skynout.com/blogs/"
     },
     {
-      "label": "Our Leadership",
-      "url": "https://www.birchtech.com/our-leadership"
+      "label": "Contact",
+      "url": "https://skynout.com/contact-us/"
     },
     {
-      "label": "Board of Directors",
-      "url": "https://www.birchtech.com/board-of-directors"
+      "label": "javascript:void(0);",
+      "url": "javascript:void(0);"
     },
     {
-      "label": "Overview",
-      "url": "https://www.birchtech.com/tech-overview"
+      "label": "javascript:void(0);",
+      "url": "javascript:void(0);"
     },
     {
-      "label": "Clean Air",
-      "url": "https://www.birchtech.com/clean-air"
+      "label": "Hire Us",
+      "url": "https://skynout.com/#contactuswork"
     },
     {
-      "label": "Clean Water",
-      "url": "https://www.birchtech.com/clean-water"
+      "label": "Get Started",
+      "url": "https://skynout.com/contact-us/"
     },
     {
-      "label": "Smart Carbon Management",
-      "url": "https://www.birchtech.com/design-centers"
+      "label": "Start with us",
+      "url": "https://skynout.com/contact-us/"
     },
     {
-      "label": "Water Treatment Solutions",
-      "url": "https://www.birchtech.com/water-treatment"
+      "label": "Start with us",
+      "url": "https://skynout.com/contact-us/"
     },
     {
-      "label": "Articles",
-      "url": "https://www.birchtech.com/articles"
+      "label": "Start with us",
+      "url": "https://skynout.com/contact-us/"
     },
     {
-      "label": "Latest Industry Updates",
-      "url": "https://www.birchtech.com/latest-industry-updates"
-    },
-    {
-      "label": "Contact us",
-      "url": "https://www.birchtech.com/contact-us"
+      "label": "Start with us",
+      "url": "https://skynout.com/contact-us/"
     },
     {
       "label": "Learn More",
-      "url": "https://www.birchtech.com/tech-overview"
+      "url": "https://skynout.com/contact-us/"
     },
     {
-      "label": "REGULATORY UPDATEDepartment of Energy Re",
-      "url": "https://www.birchtech.com/press-release-and-article/department-of-energy-releases-report-on-evaluating-u-s-grid-reliability-and-security"
+      "label": "Learn More",
+      "url": "https://skynout.com/contact-us/"
     },
     {
-      "label": "Regulatory UpdateUS Court of DE Issues M",
-      "url": "https://www.birchtech.com/press-release-and-article/us-court-of-de-issues-memorandum-opinion-on-june-10th-2025"
+      "label": "Google Ads Experts",
+      "url": "https://skynout.com/google-ads-management-agency/"
     },
     {
-      "label": "PRESS RELEASEBirchtech Strengthens Water",
-      "url": "https://www.birchtech.com/press-release-and-article/birchtech-strengthens-water-treatment-commercialization-team-with-strategic-leadership-appointments"
+      "label": "https://skynout.com/google-ads-managemen",
+      "url": "https://skynout.com/google-ads-management-agency/"
     },
     {
-      "label": "REGULATORY UPDATEAdministrator Zeldin An",
-      "url": "https://www.birchtech.com/press-release-and-article/administrator-zeldin-announces-major-epa-actions-to-combat-pfas-contamination"
+      "label": "Learn More",
+      "url": "https://skynout.com/google-ads-management-agency/"
     },
     {
-      "label": "Discover More",
-      "url": "https://www.birchtech.com/latest-industry-updates"
+      "label": "Learn More",
+      "url": "https://skynout.com/contact-us/"
     },
     {
-      "label": "About us",
-      "url": "https://www.birchtech.com/about-us"
+      "label": "Learn More",
+      "url": "https://skynout.com/contact-us/"
     },
     {
-      "label": "Mercury Emission ControlLearn more",
-      "url": "https://www.birchtech.com/clean-air"
+      "label": "https://skynout.com/what-does-an-seo-age",
+      "url": "https://skynout.com/what-does-an-seo-agency-do/"
     },
     {
-      "label": "Water PurificationLearn more",
-      "url": "https://www.birchtech.com/clean-water"
+      "label": "What Does an SEO Agency Do?",
+      "url": "https://skynout.com/what-does-an-seo-agency-do/"
     },
     {
-      "label": "Get In Touch",
-      "url": "https://www.birchtech.com/contact-us"
+      "label": "Read More",
+      "url": "https://skynout.com/what-does-an-seo-agency-do/"
     },
     {
-      "label": "Technology",
-      "url": "https://www.birchtech.com/tech-overview"
+      "label": "SERVICE",
+      "url": "https://skynout.com/services/"
     },
     {
-      "label": "Design Centers",
-      "url": "https://www.birchtech.com/design-centers"
+      "label": "PORTFOLIO",
+      "url": "https://skynout.com/portfolio/"
     },
     {
-      "label": "News",
-      "url": "https://www.birchtech.com/articles"
+      "label": "ABOUT",
+      "url": "https://skynout.com/about/"
     },
     {
-      "label": "Contact Us",
-      "url": "https://www.birchtech.com/contact-us"
+      "label": "BLOGS",
+      "url": "https://skynout.com/blogs/"
     },
     {
-      "label": "Privacy Policy",
-      "url": "https://www.birchtech.com/privacy-policy"
-    },
-    {
-      "label": "Disclaimer",
-      "url": "https://www.birchtech.com/disclaimer"
-    },
-    {
-      "label": "Contact Us",
-      "url": "https://www.birchtech.com/contact-us"
+      "label": "CONTACT",
+      "url": "https://skynout.com/contact-us/"
     }
   ]
 }
