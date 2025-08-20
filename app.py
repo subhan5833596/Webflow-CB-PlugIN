@@ -8,11 +8,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-# Ensure data files exist
-for f in ["rules.json", "events.json"]:
-    if not os.path.exists(f):
-        with open(f, "w") as file:
-            json.dump([], file)
+
 
 @app.route("/")
 def index():
@@ -353,7 +349,7 @@ import os
 def track_event():
     try:
         data = request.get_json()
-        events_file_path = os.path.join(os.path.dirname(__file__), "events.json")
+        events_file_path = os.path.join(app.root_path, "static", "events.json")
 
         # If file doesn't exist, create an empty list
         if not os.path.exists(events_file_path):
@@ -406,11 +402,8 @@ def track_event():
 
 @app.route("/get_events")
 def get_events():
-    import os
-    import json
-
     try:
-        events_path = os.path.join(os.path.dirname(__file__), "events.json")
+        events_path = os.path.join(app.root_path, "static", "events.json")
 
         if not os.path.exists(events_path):
             return jsonify([])
@@ -424,6 +417,7 @@ def get_events():
         return jsonify({"error": str(e)}), 500
 
     return jsonify(events)
+
 
 @app.route("/delete_rule/<int:index>", methods=["DELETE"])
 def delete_rule(index):
@@ -485,32 +479,41 @@ def setup_page():
 
 @app.route("/setup", methods=["POST"])
 def setup():
+    import os
+    import json
+    import requests
+    from bs4 import BeautifulSoup
+    from urllib.parse import urljoin
+
     data = request.get_json()
     site_url = data.get("webflow_url")
+    if not site_url:
+        return jsonify({"error": "Missing webflow_url"}), 400
 
-    import os
     config_path = os.path.join(app.static_folder, "site_config.json")
 
-    # Pehle check kar lo site_config.json exist karta h ya nahi
+    # Load existing sites as a list
+    all_sites = []
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as f:
             try:
-                existing_data = json.load(f)
-                if existing_data.get("webflow_url") == site_url:
-                    # ✅ Already exist, no need to fetch again
-                    return jsonify({
-                        "message": "Website already exists",
-                        "pages": existing_data.get("pages", [])
-                    })
+                all_sites = json.load(f)
             except json.JSONDecodeError:
-                pass  # agar file corrupt ho toh fresh scrape karenge
+                all_sites = []
 
-    # Agar file exist nahi karti ya url different hai toh scrape karo
+    # Check if site already exists
+    for site in all_sites:
+        if site.get("webflow_url") == site_url:
+            return jsonify({
+                "message": "Website already exists",
+                "pages": site.get("pages", [])
+            })
+
+    # Scrape pages if not exist
     try:
         res = requests.get(site_url, timeout=10)
+        res.raise_for_status()
         soup = BeautifulSoup(res.text, "html.parser")
-
-        from urllib.parse import urljoin
 
         pages = []
         for tag in soup.find_all("a", href=True):
@@ -524,16 +527,19 @@ def setup():
                 "url": full_url
             })
 
-        site_data = {
+        # Add new site to the list
+        new_site = {
             "webflow_url": site_url,
             "pages": pages
         }
+        all_sites.append(new_site)
 
-        # ✅ ab static folder me save hoga
+        # Save back to static/site_config.json
         with open(config_path, "w", encoding="utf-8") as f:
-            json.dump(site_data, f, indent=2)
+            json.dump(all_sites, f, indent=2)
 
         return jsonify({"message": "Setup saved", "pages": pages})
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -610,7 +616,6 @@ def delete_site_config():
 @app.route("/extract_pages")
 def extract_pages():
     site_url = request.args.get("site_url")
-
     if not site_url:
         return jsonify({"error": "Missing site_url"}), 400
 
@@ -622,13 +627,14 @@ def extract_pages():
 
     try:
         with open(config_path, "r", encoding="utf-8") as f:
-            site_data = json.load(f)
+            all_sites = json.load(f)
 
-        # URL match check
-        if site_data.get("webflow_url") != site_url:
+        # all_sites is now a list of dicts
+        matched_site = next((site for site in all_sites if site.get("webflow_url") == site_url), None)
+        if not matched_site:
             return jsonify({"error": "Website not found in site_config.json"}), 404
 
-        pages = site_data.get("pages", [])
+        pages = matched_site.get("pages", [])
         return jsonify(pages)
 
     except json.JSONDecodeError:

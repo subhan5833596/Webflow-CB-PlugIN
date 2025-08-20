@@ -1,45 +1,304 @@
-{
-  "webflow_url": "https://skynout.com/",
-  "pages": [
-    {
-      "label": "https://skynout.com/",
-      "url": "https://skynout.com/"
-    },
-    {
-      "label": "Home",
-      "url": "https://skynout.com/"
-    },
-    {
-      "label": "About",
-      "url": "https://skynout.com/about/"
-    },
-    {
-      "label": "Services",
-      "url": "https://skynout.com/services/"
-    },
-    {
-      "label": "Portfolio",
-      "url": "https://skynout.com/portfolio/"
-    },
-    {
-      "label": "Blogs",
-      "url": "https://skynout.com/blogs/"
-    },
-    {
-      "label": "Contact",
-      "url": "https://skynout.com/contact-us/"
-    },
-    {
-      "label": "https://skynout.com/",
-      "url": "https://skynout.com/"
-    },
-    {
-      "label": "Google Ads Experts",
-      "url": "https://skynout.com/google-ads-management-agency/"
-    },
-    {
-      "label": "What Does an SEO Agency Do?",
-      "url": "https://skynout.com/what-does-an-seo-agency-do/"
-    }
-  ]
-}
+[
+  {
+    "webflow_url": "https://skynout.com/",
+    "pages": [
+      {
+        "label": "https://skynout.com/",
+        "url": "https://skynout.com/"
+      },
+      {
+        "label": "Home",
+        "url": "https://skynout.com/"
+      },
+      {
+        "label": "About",
+        "url": "https://skynout.com/about/"
+      },
+      {
+        "label": "Services",
+        "url": "https://skynout.com/services/"
+      },
+      {
+        "label": "Portfolio",
+        "url": "https://skynout.com/portfolio/"
+      },
+      {
+        "label": "Blogs",
+        "url": "https://skynout.com/blogs/"
+      },
+      {
+        "label": "Contact",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "https://skynout.com/",
+        "url": "https://skynout.com/"
+      },
+      {
+        "label": "Home",
+        "url": "https://skynout.com/"
+      },
+      {
+        "label": "About",
+        "url": "https://skynout.com/about/"
+      },
+      {
+        "label": "Services",
+        "url": "https://skynout.com/services/"
+      },
+      {
+        "label": "Portfolio",
+        "url": "https://skynout.com/portfolio/"
+      },
+      {
+        "label": "Blogs",
+        "url": "https://skynout.com/blogs/"
+      },
+      {
+        "label": "Contact",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "javascript:void(0);",
+        "url": "javascript:void(0);"
+      },
+      {
+        "label": "javascript:void(0);",
+        "url": "javascript:void(0);"
+      },
+      {
+        "label": "Hire Us",
+        "url": "https://skynout.com/#contactuswork"
+      },
+      {
+        "label": "Get Started",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "Start with us",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "Start with us",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "Start with us",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "Start with us",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "Learn More",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "Learn More",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "Google Ads Experts",
+        "url": "https://skynout.com/google-ads-management-agency/"
+      },
+      {
+        "label": "https://skynout.com/google-ads-managemen",
+        "url": "https://skynout.com/google-ads-management-agency/"
+      },
+      {
+        "label": "Learn More",
+        "url": "https://skynout.com/google-ads-management-agency/"
+      },
+      {
+        "label": "Learn More",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "Learn More",
+        "url": "https://skynout.com/contact-us/"
+      },
+      {
+        "label": "https://skynout.com/what-does-an-seo-age",
+        "url": "https://skynout.com/what-does-an-seo-agency-do/"
+      },
+      {
+        "label": "What Does an SEO Agency Do?",
+        "url": "https://skynout.com/what-does-an-seo-agency-do/"
+      },
+      {
+        "label": "Read More",
+        "url": "https://skynout.com/what-does-an-seo-agency-do/"
+      },
+      {
+        "label": "SERVICE",
+        "url": "https://skynout.com/services/"
+      },
+      {
+        "label": "PORTFOLIO",
+        "url": "https://skynout.com/portfolio/"
+      },
+      {
+        "label": "ABOUT",
+        "url": "https://skynout.com/about/"
+      },
+      {
+        "label": "BLOGS",
+        "url": "https://skynout.com/blogs/"
+      },
+      {
+        "label": "CONTACT",
+        "url": "https://skynout.com/contact-us/"
+      }
+    ]
+  },
+  {
+    "webflow_url": "https://www.birchtech.com/",
+    "pages": [
+      {
+        "label": "https://www.birchtech.com/",
+        "url": "https://www.birchtech.com/"
+      },
+      {
+        "label": "Company Overview",
+        "url": "https://www.birchtech.com/about-us"
+      },
+      {
+        "label": "Our Leadership",
+        "url": "https://www.birchtech.com/our-leadership"
+      },
+      {
+        "label": "Board of Directors",
+        "url": "https://www.birchtech.com/board-of-directors"
+      },
+      {
+        "label": "Overview",
+        "url": "https://www.birchtech.com/tech-overview"
+      },
+      {
+        "label": "Clean Air",
+        "url": "https://www.birchtech.com/clean-air"
+      },
+      {
+        "label": "Clean Water",
+        "url": "https://www.birchtech.com/clean-water"
+      },
+      {
+        "label": "Smart Carbon Management",
+        "url": "https://www.birchtech.com/design-centers"
+      },
+      {
+        "label": "Water Treatment Solutions",
+        "url": "https://www.birchtech.com/water-treatment"
+      },
+      {
+        "label": "Articles",
+        "url": "https://www.birchtech.com/articles"
+      },
+      {
+        "label": "Latest Industry Updates",
+        "url": "https://www.birchtech.com/latest-industry-updates"
+      },
+      {
+        "label": "Contact Us",
+        "url": "https://www.birchtech.com/contact-us"
+      },
+      {
+        "label": "About Us",
+        "url": "https://www.birchtech.com/about-us"
+      },
+      {
+        "label": "Our Leadership",
+        "url": "https://www.birchtech.com/our-leadership"
+      },
+      {
+        "label": "Board of Directors",
+        "url": "https://www.birchtech.com/board-of-directors"
+      },
+      {
+        "label": "Overview",
+        "url": "https://www.birchtech.com/tech-overview"
+      },
+      {
+        "label": "Clean Air",
+        "url": "https://www.birchtech.com/clean-air"
+      },
+      {
+        "label": "Clean Water",
+        "url": "https://www.birchtech.com/clean-water"
+      },
+      {
+        "label": "Smart Carbon Management",
+        "url": "https://www.birchtech.com/design-centers"
+      },
+      {
+        "label": "Water Treatment Solutions",
+        "url": "https://www.birchtech.com/water-treatment"
+      },
+      {
+        "label": "Articles",
+        "url": "https://www.birchtech.com/articles"
+      },
+      {
+        "label": "Latest Industry Updates",
+        "url": "https://www.birchtech.com/latest-industry-updates"
+      },
+      {
+        "label": "Contact us",
+        "url": "https://www.birchtech.com/contact-us"
+      },
+      {
+        "label": "Learn More",
+        "url": "https://www.birchtech.com/tech-overview"
+      },
+      {
+        "label": "Discover More",
+        "url": "https://www.birchtech.com/latest-industry-updates"
+      },
+      {
+        "label": "About us",
+        "url": "https://www.birchtech.com/about-us"
+      },
+      {
+        "label": "Mercury Emission ControlLearn more",
+        "url": "https://www.birchtech.com/clean-air"
+      },
+      {
+        "label": "Water PurificationLearn more",
+        "url": "https://www.birchtech.com/clean-water"
+      },
+      {
+        "label": "Get In Touch",
+        "url": "https://www.birchtech.com/contact-us"
+      },
+      {
+        "label": "Technology",
+        "url": "https://www.birchtech.com/tech-overview"
+      },
+      {
+        "label": "Design Centers",
+        "url": "https://www.birchtech.com/design-centers"
+      },
+      {
+        "label": "News",
+        "url": "https://www.birchtech.com/articles"
+      },
+      {
+        "label": "Contact Us",
+        "url": "https://www.birchtech.com/contact-us"
+      },
+      {
+        "label": "Privacy Policy",
+        "url": "https://www.birchtech.com/privacy-policy"
+      },
+      {
+        "label": "Disclaimer",
+        "url": "https://www.birchtech.com/disclaimer"
+      },
+      {
+        "label": "Contact Us",
+        "url": "https://www.birchtech.com/contact-us"
+      }
+    ]
+  }
+]
