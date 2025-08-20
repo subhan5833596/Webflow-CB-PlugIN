@@ -47,66 +47,49 @@ option.textContent = p.label; // 👈 use label instead of url.split
   }
 
   // Fetch elements for selected page
-  async function fetchElements(url) {
-    const res = await fetch(
-      `/get_elements?page_url=${encodeURIComponent(url)}`
-    );
-    const elements = await res.json();
-    selectorDropdown.innerHTML = "";
+ async function fetchElements(url) {
+  const webUrl = document.getElementById("website-url").value.trim();
+  const res = await fetch(
+    `/get_elements?web_url=${encodeURIComponent(webUrl)}&page_url=${encodeURIComponent(url)}`
+  );
+  const data = await res.json();
 
-    // elements.forEach((el, index) => {
-    //   const opt = document.createElement("option");
-    //   opt.value = el.selector;
+  // ✅ Check if elements exist in response
+  const elements = data.elements || [];
 
-    //   const displaySelector =
-    //     el.selector.length > 60
-    //       ? el.selector.slice(0, 60) + "..."
-    //       : el.selector;
+  selectorDropdown.innerHTML = "";
 
-    //   opt.textContent = `${el.name} [${displaySelector}]`;
-
-    //   // ✅ Add dataset fields for selection display
-    //   opt.dataset.index = index;
-    //   opt.dataset.selector = el.selector;
-    //   opt.dataset.text = el.name;
-    //   opt.dataset.tag = el.tag;
-    //   opt.dataset.id = el.id;
-    //   opt.dataset.classes = el.classes;
-
-    //   selectorDropdown.appendChild(opt);
-    // });
   elements.forEach((el, index) => {
-  const opt = document.createElement("option");
-  opt.value = el.selector;
+    const opt = document.createElement("option");
+    opt.value = el.selector;
 
-  // ✅ Priority based label
-  let displayParts = [];
-  if (el.text) displayParts.push(`Text: "${el.text}"`);
-  if (el.tag) displayParts.push(`Tag: <${el.tag}>`);
-  if (el.name) displayParts.push(`Name: ${el.name}`);
-  if (el.id) displayParts.push(`ID: ${el.id}`);
-  if (el.classes) displayParts.push(`Class: ${el.classes}`);
-  if (el.selector) displayParts.push(`Selector: ${el.selector.slice(0, 60)}...`);
+    let displayParts = [];
+    if (el.text) displayParts.push(`Text: "${el.text}"`);
+    if (el.tag) displayParts.push(`Tag: <${el.tag}>`);
+    if (el.name) displayParts.push(`Name: ${el.name}`);
+    if (el.id) displayParts.push(`ID: ${el.id}`);
+    if (el.classes) displayParts.push(`Class: ${el.classes}`);
+    if (el.selector) displayParts.push(`Selector: ${el.selector.slice(0, 60)}...`);
 
-  opt.textContent = displayParts.join(" | ");
+    opt.textContent = displayParts.join(" | ");
 
-  // ✅ Add dataset for later use
-  opt.dataset.index = index;
-  opt.dataset.selector = el.selector;
-  opt.dataset.text = el.text;
-  opt.dataset.tag = el.tag;
-  opt.dataset.name = el.name;
-  opt.dataset.id = el.id;
-  opt.dataset.classes = el.classes;
+    // Add dataset for later use
+    opt.dataset.index = index;
+    opt.dataset.selector = el.selector;
+    opt.dataset.text = el.text;
+    opt.dataset.tag = el.tag;
+    opt.dataset.name = el.name;
+    opt.dataset.id = el.id;
+    opt.dataset.classes = el.classes;
 
-  selectorDropdown.appendChild(opt);
-});
+    selectorDropdown.appendChild(opt);
+  });
 
-    if (elements.length > 0) {
-      selectorDropdown.selectedIndex = 0;
-      selectorDropdown.dispatchEvent(new Event("change"));
-    }
+  if (elements.length > 0) {
+    selectorDropdown.selectedIndex = 0;
+    selectorDropdown.dispatchEvent(new Event("change"));
   }
+}
 
   // Change handler for Page URL dropdown
   pageUrlSelect.addEventListener("change", (e) => {
