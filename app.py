@@ -417,18 +417,15 @@ def setup():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/get_site_config", methods=["GET"])
-def get_site_config():
-    file_path = os.path.join("static", "site_config.json")
-
-    if not os.path.exists(file_path):
-        return jsonify({"error": "file not found", "path": file_path})
-
-    with open(file_path, "r") as f:
-        try:
-            return jsonify(json.load(f))
-        except json.JSONDecodeError:
-            return jsonify({"error": "Invalid JSON format"})
+@app.route("/get_config")
+def get_config():
+    try:
+        path = os.path.join(app.static_folder, "site_config.json")
+        with open(path, "r") as f:
+            data = json.load(f)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e), "path": path})
 
 @app.route("/delete_site_config", methods=["DELETE"])
 def delete_site_config():
