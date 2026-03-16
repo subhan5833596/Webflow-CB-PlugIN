@@ -477,25 +477,87 @@ def setup_page():
 #     except Exception as e:
 #         return jsonify({"error": str(e)}), 500
 
+# @app.route("/setup", methods=["POST"])
+# def setup():
+#     import os
+#     import json
+#     import requests
+#     from bs4 import BeautifulSoup
+#     from urllib.parse import urljoin
+
+#     data = request.get_json()
+#     site_url = data.get("webflow_url")
+#     if not site_url:
+#         return jsonify({"error": "Missing webflow_url"}), 400
+
+#     config_path = os.path.join(app.static_folder, "site_config.json")
+
+#     # Load existing sites as a list
+#     all_sites = []
+#     if os.path.exists(config_path):
+#         with open(config_path, "r", encoding="utf-8") as f:
+#             try:
+#                 all_sites = json.load(f)
+#             except json.JSONDecodeError:
+#                 all_sites = []
+
+#     # Check if site already exists
+#     for site in all_sites:
+#         if site.get("webflow_url") == site_url:
+#             return jsonify({
+#                 "message": "Website already exists",
+#                 "pages": site.get("pages", [])
+#             })
+
+#     # Scrape pages if not exist
+#     try:
+#         res = requests.get(site_url, timeout=10)
+#         res.raise_for_status()
+#         soup = BeautifulSoup(res.text, "html.parser")
+
+#         pages = []
+#         for tag in soup.find_all("a", href=True):
+#             href = tag['href']
+#             if href.startswith("#") or "mailto:" in href or (href.startswith("http") and site_url not in href):
+#                 continue
+#             full_url = urljoin(site_url, href)
+#             label = tag.get_text(strip=True) or full_url
+#             pages.append({
+#                 "label": label[:40],
+#                 "url": full_url
+#             })
+
+#         # Add new site to the list
+#         new_site = {
+#             "webflow_url": site_url,
+#             "pages": pages
+#         }
+#         all_sites.append(new_site)
+
+#         # Save back to static/site_config.json
+#         with open(config_path, "w", encoding="utf-8") as f:
+#             json.dump(all_sites, f, indent=2)
+
+#         return jsonify({"message": "Setup saved", "pages": pages})
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+# Use /tmp folder for writable storage on Vercel
+CONFIG_PATH = "/tmp/site_config.json"
+
+
 @app.route("/setup", methods=["POST"])
 def setup():
-    import os
-    import json
-    import requests
-    from bs4 import BeautifulSoup
-    from urllib.parse import urljoin
-
     data = request.get_json()
     site_url = data.get("webflow_url")
     if not site_url:
         return jsonify({"error": "Missing webflow_url"}), 400
 
-    config_path = os.path.join(app.static_folder, "site_config.json")
-
-    # Load existing sites as a list
+    # Load existing sites
     all_sites = []
-    if os.path.exists(config_path):
-        with open(config_path, "r", encoding="utf-8") as f:
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             try:
                 all_sites = json.load(f)
             except json.JSONDecodeError:
@@ -509,7 +571,7 @@ def setup():
                 "pages": site.get("pages", [])
             })
 
-    # Scrape pages if not exist
+    # Scrape pages
     try:
         res = requests.get(site_url, timeout=10)
         res.raise_for_status()
@@ -527,21 +589,65 @@ def setup():
                 "url": full_url
             })
 
-        # Add new site to the list
+        # Add new site
         new_site = {
             "webflow_url": site_url,
             "pages": pages
         }
         all_sites.append(new_site)
 
-        # Save back to static/site_config.json
-        with open(config_path, "w", encoding="utf-8") as f:
+        # Save to /tmp (Vercel writable)
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(all_sites, f, indent=2)
 
         return jsonify({"message": "Setup saved", "pages": pages})
 
+    except requests.RequestException as e:
+        return jsonify({"error": f"Failed to fetch site: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/extract_pages")
+def extract_pages():
+    site_url = request.args.get("site_url")
+    if not site_url:
+        return jsonify({"error": "Missing site_url"}), 400
+
+    # Use /tmp folder for writable storage on Vercel
+    config_path = "/tmp/site_config.json"
+
+    if not os.path.exists(config_path):
+        return jsonify({"error": "site_config.json not found"}), 404
+
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            all_sites = json.load(f)
+
+        # all_sites is a list of dicts
+        matched_site = next((site for site in all_sites if site.get("webflow_url") == site_url), None)
+        if not matched_site:
+            return jsonify({"error": "Website not found in site_config.json"}), 404
+
+        pages = matched_site.get("pages", [])
+        return jsonify(pages)
+
+    except json.JSONDecodeError:
+        return jsonify({"error": "Corrupted site_config.json"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @app.route("/get_config")
@@ -613,34 +719,34 @@ def delete_site_config():
 #     except Exception as e:
 #         return jsonify({"error": str(e)}), 500
 
-@app.route("/extract_pages")
-def extract_pages():
-    site_url = request.args.get("site_url")
-    if not site_url:
-        return jsonify({"error": "Missing site_url"}), 400
+# @app.route("/extract_pages")
+# def extract_pages():
+#     site_url = request.args.get("site_url")
+#     if not site_url:
+#         return jsonify({"error": "Missing site_url"}), 400
 
-    import os
-    config_path = os.path.join(app.static_folder, "site_config.json")
+#     import os
+#     config_path = os.path.join(app.static_folder, "site_config.json")
 
-    if not os.path.exists(config_path):
-        return jsonify({"error": "site_config.json not found"}), 404
+#     if not os.path.exists(config_path):
+#         return jsonify({"error": "site_config.json not found"}), 404
 
-    try:
-        with open(config_path, "r", encoding="utf-8") as f:
-            all_sites = json.load(f)
+#     try:
+#         with open(config_path, "r", encoding="utf-8") as f:
+#             all_sites = json.load(f)
 
-        # all_sites is now a list of dicts
-        matched_site = next((site for site in all_sites if site.get("webflow_url") == site_url), None)
-        if not matched_site:
-            return jsonify({"error": "Website not found in site_config.json"}), 404
+#         # all_sites is now a list of dicts
+#         matched_site = next((site for site in all_sites if site.get("webflow_url") == site_url), None)
+#         if not matched_site:
+#             return jsonify({"error": "Website not found in site_config.json"}), 404
 
-        pages = matched_site.get("pages", [])
-        return jsonify(pages)
+#         pages = matched_site.get("pages", [])
+#         return jsonify(pages)
 
-    except json.JSONDecodeError:
-        return jsonify({"error": "Corrupted site_config.json"}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#     except json.JSONDecodeError:
+#         return jsonify({"error": "Corrupted site_config.json"}), 500
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 
 
