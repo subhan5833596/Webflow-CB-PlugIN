@@ -1,0 +1,38 @@
+[
+  {
+    "rule_id": "69f9c4d5-0f53-4d8b-b6fd-c25a81f8c3b5",
+    "created_at": "2025-07-19T14:55:57.454650Z",
+    "website_url": "https://www.birchtech.com/",
+    "page_url": "https://www.birchtech.com/",
+    "action": "click",
+    "selector": "html:nth-of-type(1) > body.body:nth-of-type(1) > div.page-wrapper:nth-of-type(2) > div:nth-of-type(1) > section.footer-main-2.footer-updated:nth-of-type(1) > div.w-layout-blockcontainer.container-large-5.w-container:nth-of-type(1) > div.row-second-wrap-2:nth-of-type(1) > div.w-layout-grid.grid-02-2:nth-of-type(1) > div.links-wrap-2.follow-copy:nth-of-type(4) > div.link-list-2:nth-of-type(1) > div.form-block-3.w-form:nth-of-type(1) > form.form-3:nth-of-type(1) > input.btn-white.hero-btn-copy.form.w-button:nth-of-type(2)",
+    "element_text": "Submit",
+    "element_tag": "input",
+    "element_id": "",
+    "element_classes": "btn-white hero-btn-copy form w-button"
+  },
+  {
+    "rule_id": "09cd52d5-2875-4bb5-ba6d-57b45cc214f0",
+    "created_at": "2025-07-19T15:07:54.053312Z",
+    "website_url": "https://www.birchtech.com/",
+    "page_url": "https://www.birchtech.com/",
+    "action": "click",
+    "selector": "html:nth-of-type(1) > body.body:nth-of-type(1) > div.page-wrapper:nth-of-type(2) > div:nth-of-type(1) > section.footer-main-2.footer-updated:nth-of-type(1) > div.w-layout-blockcontainer.container-large-5.w-container:nth-of-type(1) > div.row-second-wrap-2:nth-of-type(1) > div.w-layout-grid.grid-02-2:nth-of-type(1) > div.links-wrap-2.follow-copy:nth-of-type(4) > div.link-list-2:nth-of-type(1) > div.form-block-3.w-form:nth-of-type(1) > form.form-3:nth-of-type(1) > input.btn-white.hero-btn-copy.form.w-button:nth-of-type(2)",
+    "element_text": "Submit",
+    "element_tag": "input",
+    "element_id": "",
+    "element_classes": "btn-white hero-btn-copy form w-button"
+  },
+  {
+    "rule_id": "5221978a-5a7d-44b6-81b1-69e7eb52d174",
+    "created_at": "2026-03-16T13:10:14.919091Z",
+    "website_url": "https://www.birchtech.com/",
+    "page_url": "https://www.birchtech.com/privacy-policy",
+    "action": "click",
+    "selector": "html:nth-of-type(1) > body.body:nth-of-type(1) > div.page-wrapper:nth-of-type(2) > div:nth-of-type(1) > section.footer-main-2.footer-updated:nth-of-type(1) > div.w-layout-blockcontainer.container-large-5.w-container:nth-of-type(1) > div.row-third-wrap-2:nth-of-type(2) > div.w-layout-grid.grid-03:nth-of-type(1) > div.sub-menu-wrap:nth-of-type(1) > a.link-text-2._1:nth-of-type(4)",
+    "element_text": "Contact Us",
+    "element_tag": "a",
+    "element_id": "",
+    "element_classes": "link-text-2 _1"
+  }
+]
