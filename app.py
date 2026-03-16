@@ -176,18 +176,179 @@ import requests
 #         print("Selector generation error:", e)
 #         return None
 
-# Static folder path for elements.json
-ELEMENTS_FILE = os.path.join(app.root_path, "static", "elements.json")
 
 
+# # Static folder path for elements.json
+# ELEMENTS_FILE = os.path.join(app.root_path, "static", "elements.json")
+
+
+# @app.route("/get_elements")
+# def get_elements():
+#     page_url = request.args.get("page_url")
+#     web_url = request.args.get("web_url")  # base website URL
+#     if not page_url or not web_url:
+#         return jsonify({"error": "Missing page_url or web_url"}), 400
+
+#     # Load existing elements.json
+#     data = {}
+#     if os.path.exists(ELEMENTS_FILE):
+#         with open(ELEMENTS_FILE, "r") as f:
+#             try:
+#                 data = json.load(f)
+#             except json.JSONDecodeError:
+#                 pass
+
+#     # Check if elements already exist
+#     if web_url in data and "pages" in data[web_url] and page_url in data[web_url]["pages"]:
+#         return jsonify({
+#             "message": "Elements already exist",
+#             "elements": data[web_url]["pages"][page_url]
+#         })
+
+#     # Agar exist nahi karte to scrape karo
+#     try:
+#         res = requests.get(page_url, timeout=5)
+#         res.raise_for_status()
+#         soup = BeautifulSoup(res.text, "html.parser")
+#         elements = []
+
+#         target_tags = ["a", "button", "form", "input", "img", "video"]
+
+#         for tag in soup.find_all(target_tags):
+#             selector = get_selector(tag)
+#             if not selector:
+#                 continue
+
+#             name = (
+#                 tag.get("aria-label") or
+#                 tag.get("alt") or
+#                 tag.get("placeholder") or
+#                 tag.get("title") or
+#                 tag.get("name") or
+#                 tag.get("value") or
+#                 tag.get("href") or
+#                 tag.get("src") or
+#                 tag.get("id") or
+#                 " ".join(tag.get("class", [])) or
+#                 tag.name
+#             )
+
+#             elements.append({
+#                 "name": str(name).strip()[:60],
+#                 "selector": selector,
+#                 "tag": tag.name,
+#                 "id": tag.get("id", ""),
+#                 "classes": " ".join(tag.get("class", [])),
+#                 "text": tag.get_text(strip=True)
+#             })
+
+#         # Ensure web_url structure
+#         if web_url not in data:
+#             data[web_url] = {"pages": {}}
+
+#         # Save elements under page_url
+#         data[web_url]["pages"][page_url] = elements
+
+#         # Write back to static file
+#         with open(ELEMENTS_FILE, "w") as f:
+#             json.dump(data, f, indent=2)
+
+#         return jsonify({"message": "Elements saved", "elements": elements})
+
+#     except Exception as e:
+#         print("Error fetching elements:", e)
+#         return jsonify({"error": str(e)}), 500
+
+
+# def get_selector(tag):
+#     """Generate CSS selector for element"""
+#     try:
+#         if tag.get("id"):
+#             return f"#{tag.get('id')}"
+
+#         path = []
+#         while tag and tag.name != "[document]":
+#             sibling_index = 1
+#             sibling = tag
+#             while sibling.previous_sibling:
+#                 sibling = sibling.previous_sibling
+#                 if sibling.name == tag.name:
+#                     sibling_index += 1
+
+#             segment = tag.name
+#             if tag.get("class"):
+#                 segment += "." + ".".join(tag.get("class"))
+#             segment += f":nth-of-type({sibling_index})"
+
+#             path.insert(0, segment)
+#             tag = tag.parent
+
+#         return " > ".join(path)
+#     except Exception as e:
+#         print("Selector generation error:", e)
+#         return None
+    
+
+
+# RULES_FILE = os.path.join(app.root_path, "static", "rules.json")
+
+# @app.route("/add_rule", methods=["POST"])
+# def add_rule():
+#     data = request.get_json()
+#     rule = {
+#         "rule_id": str(uuid.uuid4()),
+#         "created_at": datetime.now().isoformat() + "Z",
+#         "website_url": data["website_url"],
+#         "page_url": data["page_url"],
+#         "action": data["action"],
+#         "selector": data["selector"],
+#         "element_text": data.get("element_text", ""),
+#         "element_tag": data.get("element_tag", ""),
+#         "element_id": data.get("element_id", ""),
+#         "element_classes": data.get("element_classes", "")
+#     }
+
+#     # Load existing rules from static
+#     rules = []
+#     if os.path.exists(RULES_FILE):
+#         with open(RULES_FILE, "r") as f:
+#             try:
+#                 rules = json.load(f)
+#             except json.JSONDecodeError:
+#                 pass
+
+#     rules.append(rule)
+
+#     # Save back to static file
+#     with open(RULES_FILE, "w") as f:
+#         json.dump(rules, f, indent=2)
+
+#     return jsonify({"message": "Rule added", "rule": rule})
+
+# @app.route("/get_rules")
+# def get_rules():
+#     try:
+#         rules_path = os.path.join(app.root_path, "static", "rules.json")
+#         with open(rules_path, "r") as f:
+#             rules = json.load(f)
+#     except Exception as e:
+#         print("Error reading rules:", e)
+#         rules = []
+#     return jsonify(rules)
+
+ELEMENTS_FILE = "/tmp/elements.json"
+RULES_FILE = "/tmp/rules.json"
+
+
+# ===== /get_elements route =====
 @app.route("/get_elements")
 def get_elements():
     page_url = request.args.get("page_url")
-    web_url = request.args.get("web_url")  # base website URL
+    web_url = request.args.get("web_url")
     if not page_url or not web_url:
         return jsonify({"error": "Missing page_url or web_url"}), 400
 
-    # Load existing elements.json
+    # Load existing elements
     data = {}
     if os.path.exists(ELEMENTS_FILE):
         with open(ELEMENTS_FILE, "r") as f:
@@ -196,27 +357,24 @@ def get_elements():
             except json.JSONDecodeError:
                 pass
 
-    # Check if elements already exist
+    # Return if already exists
     if web_url in data and "pages" in data[web_url] and page_url in data[web_url]["pages"]:
         return jsonify({
             "message": "Elements already exist",
             "elements": data[web_url]["pages"][page_url]
         })
 
-    # Agar exist nahi karte to scrape karo
     try:
         res = requests.get(page_url, timeout=5)
         res.raise_for_status()
         soup = BeautifulSoup(res.text, "html.parser")
         elements = []
-
         target_tags = ["a", "button", "form", "input", "img", "video"]
 
         for tag in soup.find_all(target_tags):
             selector = get_selector(tag)
             if not selector:
                 continue
-
             name = (
                 tag.get("aria-label") or
                 tag.get("alt") or
@@ -230,7 +388,6 @@ def get_elements():
                 " ".join(tag.get("class", [])) or
                 tag.name
             )
-
             elements.append({
                 "name": str(name).strip()[:60],
                 "selector": selector,
@@ -240,21 +397,17 @@ def get_elements():
                 "text": tag.get_text(strip=True)
             })
 
-        # Ensure web_url structure
         if web_url not in data:
             data[web_url] = {"pages": {}}
-
-        # Save elements under page_url
         data[web_url]["pages"][page_url] = elements
 
-        # Write back to static file
+        # Write back to /tmp
         with open(ELEMENTS_FILE, "w") as f:
             json.dump(data, f, indent=2)
 
         return jsonify({"message": "Elements saved", "elements": elements})
 
     except Exception as e:
-        print("Error fetching elements:", e)
         return jsonify({"error": str(e)}), 500
 
 
@@ -263,7 +416,6 @@ def get_selector(tag):
     try:
         if tag.get("id"):
             return f"#{tag.get('id')}"
-
         path = []
         while tag and tag.name != "[document]":
             sibling_index = 1
@@ -272,24 +424,19 @@ def get_selector(tag):
                 sibling = sibling.previous_sibling
                 if sibling.name == tag.name:
                     sibling_index += 1
-
             segment = tag.name
             if tag.get("class"):
                 segment += "." + ".".join(tag.get("class"))
             segment += f":nth-of-type({sibling_index})"
-
             path.insert(0, segment)
             tag = tag.parent
-
         return " > ".join(path)
     except Exception as e:
         print("Selector generation error:", e)
         return None
-    
 
 
-RULES_FILE = os.path.join(app.root_path, "static", "rules.json")
-
+# ===== /add_rule route =====
 @app.route("/add_rule", methods=["POST"])
 def add_rule():
     data = request.get_json()
@@ -306,7 +453,6 @@ def add_rule():
         "element_classes": data.get("element_classes", "")
     }
 
-    # Load existing rules from static
     rules = []
     if os.path.exists(RULES_FILE):
         with open(RULES_FILE, "r") as f:
@@ -317,22 +463,23 @@ def add_rule():
 
     rules.append(rule)
 
-    # Save back to static file
     with open(RULES_FILE, "w") as f:
         json.dump(rules, f, indent=2)
 
     return jsonify({"message": "Rule added", "rule": rule})
+
+
+# ===== /get_rules route =====
 @app.route("/get_rules")
 def get_rules():
-    try:
-        rules_path = os.path.join(app.root_path, "static", "rules.json")
-        with open(rules_path, "r") as f:
-            rules = json.load(f)
-    except Exception as e:
-        print("Error reading rules:", e)
-        rules = []
+    rules = []
+    if os.path.exists(RULES_FILE):
+        with open(RULES_FILE, "r") as f:
+            try:
+                rules = json.load(f)
+            except json.JSONDecodeError:
+                rules = []
     return jsonify(rules)
-
 
 # @app.route("/get_rules")
 # def get_rules():

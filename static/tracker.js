@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://fire5833596.pythonanywhere.com"; // Your backend URL
+const BACKEND_URL = "https://webflow-cb-plug-in.vercel.app/"; // Your backend URL
 
 window.addEventListener("load", async () => {
   try {
