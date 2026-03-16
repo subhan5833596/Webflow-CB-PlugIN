@@ -652,13 +652,19 @@ def extract_pages():
 
 @app.route("/get_config")
 def get_config():
+    config_path = "/tmp/site_config.json"  # Vercel writable path
+
+    if not os.path.exists(config_path):
+        return jsonify({"error": "site_config.json not found"}), 404
+
     try:
-        path = os.path.join(app.static_folder, "site_config.json")
-        with open(path, "r") as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         return jsonify(data)
+    except json.JSONDecodeError:
+        return jsonify({"error": "Corrupted site_config.json"}), 500
     except Exception as e:
-        return jsonify({"error": str(e), "path": path})
+        return jsonify({"error": str(e)})
 
 @app.route("/delete_site_config", methods=["DELETE"])
 def delete_site_config():
