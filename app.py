@@ -367,16 +367,22 @@ def get_elements():
         })
 
     # scrape
+    # scrape
     res = requests.get(page_url)
     soup = BeautifulSoup(res.text, "html.parser")
 
     elements = []
     for tag in soup.find_all(["a", "button", "input"]):
+        selector = get_selector(tag)  # <-- generate selector
         elements.append({
             "tag": tag.name,
-            "text": tag.get_text(strip=True)
+            "text": tag.get_text(strip=True),
+            "id": tag.get("id"),
+            "classes": tag.get("class"),
+            "selector": selector  # <-- store it
         })
 
+    # insert into Supabase
     supabase.table("elements").insert({
         "web_url": web_url,
         "page_url": page_url,
