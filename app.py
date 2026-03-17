@@ -447,15 +447,28 @@ import os
 
 @app.route("/track_event", methods=["POST"])
 def track_event():
-    data = request.json
+    event = request.json
 
-    # Example insert into events table
+    # Insert into Supabase
     res = supabase.table("events").insert({
-        "data": data
+        "id": str(uuid.uuid4()),
+        "data": {
+            "user": event.get("user"),
+            "website_url": event.get("website_url"),
+            "page_url": event.get("page_url"),
+            "selector": event.get("selector"),
+            "action": event.get("action"),
+            "matched_rule": event.get("matched_rule", False),
+            "timestamp": event.get("timestamp") or datetime.datetime.utcnow().isoformat()
+        }
     }).execute()
 
-    print("Supabase insert response:", res)
-    return jsonify(res)
+    # Return only serializable data
+    return jsonify({
+        "status": res.status_code,
+        "data": res.data,
+        "error": res.error
+    })
 
 
 

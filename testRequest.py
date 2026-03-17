@@ -1,6 +1,6 @@
 import uuid
-
 import requests
+import datetime
 
 SUPABASE_URL = "https://dcappavpcbxdcxdurrsp.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjYXBwYXZwY2J4ZGN4ZHVycnNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MzY4ODksImV4cCI6MjA4OTMxMjg4OX0.LWNTG4pca4gzi4hdgtofOf9TzDGo9JyOZLuANlMy3ks"
@@ -11,14 +11,21 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
-# Example insert for site_config
-data = {
-    "id": str(uuid.uuid4()),
-    "webflow_url": "https://example.com",
-    "pages": {"home": "/", "about": "/about"}
+# Example insert for events table
+event_data = {
+    "id": str(uuid.uuid4()),  # unique id
+    "data": {
+        "user": "anonymous",
+        "website_url": "https://example.com",
+        "page_url": "https://example.com/home",
+        "selector": "#hero > button:nth-of-type(1)",
+        "action": "click",
+        "matched_rule": True,
+        "timestamp": datetime.datetime.utcnow().isoformat()
+    }
 }
 
-res = requests.post(f"{SUPABASE_URL}/rest/v1/site_config", json=data, headers=HEADERS)
+res = requests.post(f"{SUPABASE_URL}/rest/v1/events", json=event_data, headers=HEADERS)
 
 print("Status code:", res.status_code)
 print("Response text:", res.text)
