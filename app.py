@@ -25,6 +25,14 @@ def tracking_history():
 from bs4 import BeautifulSoup
 import requests
 
+from supabase import create_client
+
+SUPABASE_URL = "https://dcappavpcbxdcxdurrsp.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjYXBwYXZwY2J4ZGN4ZHVycnNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MzY4ODksImV4cCI6MjA4OTMxMjg4OX0.LWNTG4pca4gzi4hdgtofOf9TzDGo9JyOZLuANlMy3ks"
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
 # @app.route("/get_elements")
 # def get_elements():
 #     page_url = request.args.get("page_url")
@@ -345,71 +353,37 @@ RULES_FILE = "/tmp/rules.json"
 def get_elements():
     page_url = request.args.get("page_url")
     web_url = request.args.get("web_url")
-    if not page_url or not web_url:
-        return jsonify({"error": "Missing page_url or web_url"}), 400
 
-    # Load existing elements
-    data = {}
-    if os.path.exists(ELEMENTS_FILE):
-        with open(ELEMENTS_FILE, "r") as f:
-            try:
-                data = json.load(f)
-            except json.JSONDecodeError:
-                pass
+    existing = supabase.table("elements") \
+        .select("*") \
+        .eq("web_url", web_url) \
+        .eq("page_url", page_url) \
+        .execute()
 
-    # Return if already exists
-    if web_url in data and "pages" in data[web_url] and page_url in data[web_url]["pages"]:
+    if existing.data:
         return jsonify({
             "message": "Elements already exist",
-            "elements": data[web_url]["pages"][page_url]
+            "elements": existing.data[0]["elements"]
         })
 
-    try:
-        res = requests.get(page_url, timeout=5)
-        res.raise_for_status()
-        soup = BeautifulSoup(res.text, "html.parser")
-        elements = []
-        target_tags = ["a", "button", "form", "input", "img", "video"]
+    # scrape
+    res = requests.get(page_url)
+    soup = BeautifulSoup(res.text, "html.parser")
 
-        for tag in soup.find_all(target_tags):
-            selector = get_selector(tag)
-            if not selector:
-                continue
-            name = (
-                tag.get("aria-label") or
-                tag.get("alt") or
-                tag.get("placeholder") or
-                tag.get("title") or
-                tag.get("name") or
-                tag.get("value") or
-                tag.get("href") or
-                tag.get("src") or
-                tag.get("id") or
-                " ".join(tag.get("class", [])) or
-                tag.name
-            )
-            elements.append({
-                "name": str(name).strip()[:60],
-                "selector": selector,
-                "tag": tag.name,
-                "id": tag.get("id", ""),
-                "classes": " ".join(tag.get("class", [])),
-                "text": tag.get_text(strip=True)
-            })
+    elements = []
+    for tag in soup.find_all(["a", "button", "input"]):
+        elements.append({
+            "tag": tag.name,
+            "text": tag.get_text(strip=True)
+        })
 
-        if web_url not in data:
-            data[web_url] = {"pages": {}}
-        data[web_url]["pages"][page_url] = elements
+    supabase.table("elements").insert({
+        "web_url": web_url,
+        "page_url": page_url,
+        "elements": elements
+    }).execute()
 
-        # Write back to /tmp
-        with open(ELEMENTS_FILE, "w") as f:
-            json.dump(data, f, indent=2)
-
-        return jsonify({"message": "Elements saved", "elements": elements})
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+    return jsonify(elements)
 
 def get_selector(tag):
     """Generate CSS selector for element"""
@@ -440,46 +414,19 @@ def get_selector(tag):
 @app.route("/add_rule", methods=["POST"])
 def add_rule():
     data = request.get_json()
-    rule = {
-        "rule_id": str(uuid.uuid4()),
-        "created_at": datetime.now().isoformat() + "Z",
-        "website_url": data["website_url"],
-        "page_url": data["page_url"],
-        "action": data["action"],
-        "selector": data["selector"],
-        "element_text": data.get("element_text", ""),
-        "element_tag": data.get("element_tag", ""),
-        "element_id": data.get("element_id", ""),
-        "element_classes": data.get("element_classes", "")
-    }
 
-    rules = []
-    if os.path.exists(RULES_FILE):
-        with open(RULES_FILE, "r") as f:
-            try:
-                rules = json.load(f)
-            except json.JSONDecodeError:
-                pass
+    supabase.table("rules").insert({
+        "data": data
+    }).execute()
 
-    rules.append(rule)
-
-    with open(RULES_FILE, "w") as f:
-        json.dump(rules, f, indent=2)
-
-    return jsonify({"message": "Rule added", "rule": rule})
-
+    return jsonify({"message": "Rule added"})
 
 # ===== /get_rules route =====
 @app.route("/get_rules")
 def get_rules():
-    rules = []
-    if os.path.exists(RULES_FILE):
-        with open(RULES_FILE, "r") as f:
-            try:
-                rules = json.load(f)
-            except json.JSONDecodeError:
-                rules = []
-    return jsonify(rules)
+    result = supabase.table("rules").select("*").execute()
+    return jsonify([r["data"] for r in result.data])
+
 
 # @app.route("/get_rules")
 # def get_rules():
@@ -494,28 +441,15 @@ import os
 
 @app.route("/track_event", methods=["POST"])
 def track_event():
-    try:
-        data = request.get_json()
-        events_file_path = os.path.join(app.root_path, "static", "events.json")
+    data = request.get_json()
 
-        # If file doesn't exist, create an empty list
-        if not os.path.exists(events_file_path):
-            events = []
-        else:
-            with open(events_file_path, "r") as f:
-                try:
-                    events = json.load(f)
-                except json.JSONDecodeError:
-                    events = []
+    supabase.table("events").insert({
+        "data": data
+    }).execute()
 
-        events.append(data)
+    return jsonify({"message": "Event tracked"})
 
-        with open(events_file_path, "w") as f:
-            json.dump(events, f, indent=2)
 
-        return jsonify({"message": "Event tracked successfully"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 # @app.route("/track_event", methods=["POST"])
 # def track_event():
@@ -549,21 +483,8 @@ def track_event():
 
 @app.route("/get_events")
 def get_events():
-    try:
-        events_path = os.path.join(app.root_path, "static", "events.json")
-
-        if not os.path.exists(events_path):
-            return jsonify([])
-
-        with open(events_path, "r") as f:
-            try:
-                events = json.load(f)
-            except json.JSONDecodeError:
-                events = []
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-    return jsonify(events)
+    result = supabase.table("events").select("*").execute()
+    return jsonify([e["data"] for e in result.data])
 
 
 @app.route("/delete_rule/<int:index>", methods=["DELETE"])
@@ -698,92 +619,52 @@ CONFIG_PATH = "/tmp/site_config.json"
 def setup():
     data = request.get_json()
     site_url = data.get("webflow_url")
-    if not site_url:
-        return jsonify({"error": "Missing webflow_url"}), 400
 
-    # Load existing sites
-    all_sites = []
-    if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-            try:
-                all_sites = json.load(f)
-            except json.JSONDecodeError:
-                all_sites = []
+    # check if exists
+    existing = supabase.table("site_config").select("*").eq("webflow_url", site_url).execute()
 
-    # Check if site already exists
-    for site in all_sites:
-        if site.get("webflow_url") == site_url:
-            return jsonify({
-                "message": "Website already exists",
-                "pages": site.get("pages", [])
-            })
+    if existing.data:
+        return jsonify({
+            "message": "Website already exists",
+            "pages": existing.data[0]["pages"]
+        })
 
-    # Scrape pages
-    try:
-        res = requests.get(site_url, timeout=10)
-        res.raise_for_status()
-        soup = BeautifulSoup(res.text, "html.parser")
+    # scrape
+    res = requests.get(site_url)
+    soup = BeautifulSoup(res.text, "html.parser")
 
-        pages = []
-        for tag in soup.find_all("a", href=True):
-            href = tag['href']
-            if href.startswith("#") or "mailto:" in href or (href.startswith("http") and site_url not in href):
-                continue
-            full_url = urljoin(site_url, href)
-            label = tag.get_text(strip=True) or full_url
-            pages.append({
-                "label": label[:40],
-                "url": full_url
-            })
+    pages = []
+    for tag in soup.find_all("a", href=True):
+        href = tag['href']
+        if href.startswith("#") or "mailto:" in href:
+            continue
 
-        # Add new site
-        new_site = {
-            "webflow_url": site_url,
-            "pages": pages
-        }
-        all_sites.append(new_site)
+        full_url = urljoin(site_url, href)
+        label = tag.get_text(strip=True) or full_url
 
-        # Save to /tmp (Vercel writable)
-        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-            json.dump(all_sites, f, indent=2)
+        pages.append({
+            "label": label[:40],
+            "url": full_url
+        })
 
-        return jsonify({"message": "Setup saved", "pages": pages})
+    # save to DB
+    supabase.table("site_config").insert({
+        "webflow_url": site_url,
+        "pages": pages
+    }).execute()
 
-    except requests.RequestException as e:
-        return jsonify({"error": f"Failed to fetch site: {str(e)}"}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+    return jsonify({"pages": pages})
 
 @app.route("/extract_pages")
 def extract_pages():
     site_url = request.args.get("site_url")
-    if not site_url:
-        return jsonify({"error": "Missing site_url"}), 400
 
-    # Use /tmp folder for writable storage on Vercel
-    config_path = "/tmp/site_config.json"
+    result = supabase.table("site_config").select("*").eq("webflow_url", site_url).execute()
 
-    if not os.path.exists(config_path):
-        return jsonify({"error": "site_config.json not found"}), 404
+    if not result.data:
+        return jsonify({"error": "Website not found"}), 404
 
-    try:
-        with open(config_path, "r", encoding="utf-8") as f:
-            all_sites = json.load(f)
-
-        # all_sites is a list of dicts
-        matched_site = next((site for site in all_sites if site.get("webflow_url") == site_url), None)
-        if not matched_site:
-            return jsonify({"error": "Website not found in site_config.json"}), 404
-
-        pages = matched_site.get("pages", [])
-        return jsonify(pages)
-
-    except json.JSONDecodeError:
-        return jsonify({"error": "Corrupted site_config.json"}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+    return jsonify(result.data[0]["pages"])
 
 
 
