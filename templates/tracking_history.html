@@ -1,71 +1,83 @@
 {% extends "base.html" %} {% block content %}
-<h2>Tracked Event History</h2>
+<h2 class="mb-4 text-center">Tracked Event History</h2>
 
-<label for="filter-page">Filter by Page URL:</label>
-<input type="text" id="filter-page" placeholder="e.g. /home or full URL" />
+<!-- Filters Card -->
+<div class="card mb-4 shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title">Filters</h5>
+    <div class="row g-3 align-items-center">
+      <div class="col-md-4">
+        <input
+          type="text"
+          id="filter-page"
+          class="form-control"
+          placeholder="Filter by Page URL"
+        />
+      </div>
+      <div class="col-md-4">
+        <select id="filter-action" class="form-select">
+          <option value="">All Actions</option>
+          <option value="click">Click</option>
+          <option value="submit">Submit</option>
+          <option value="hover">Hover</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-primary w-100" onclick="applyFilters()">
+          Apply Filters
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-<label for="filter-action">Filter by Action:</label>
-<select id="filter-action">
-  <option value="">All</option>
-  <option value="click">Click</option>
-  <option value="submit">Submit</option>
-  <option value="hover">Hover</option>
-</select>
+<!-- Table Card -->
+<div class="card mb-4 shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title">Event Table</h5>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Time</th>
+            <th>Page</th>
+            <th>Action</th>
+            <th>Selector</th>
+          </tr>
+        </thead>
+        <tbody id="event-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-<button onclick="applyFilters()">Apply Filters</button>
+<!-- Chart Card -->
+<!-- <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">Event Summary</h5>
+      <canvas id="eventChart" width="400" height="200"></canvas>
+    </div>
+  </div> -->
 
-<table>
-  <thead>
-    <tr>
-      <th>Time</th>
-      <th>Page</th>
-      <th>Action</th>
-      <th>Selector</th>
-    </tr>
-  </thead>
-  <tbody id="event-table-body"></tbody>
-</table>
-<canvas id="eventChart" width="400" height="200"></canvas>
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  function buildChart(events) {
-    const counts = { click: 0, hover: 0, submit: 0 };
-    events.forEach((e) => {
-      if (counts[e.action] !== undefined) counts[e.action]++;
-    });
-
-    const ctx = document.getElementById("eventChart").getContext("2d");
-    new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: Object.keys(counts),
-        datasets: [
-          {
-            label: "# of Events",
-            data: Object.values(counts),
-            backgroundColor: ["#4caf50", "#2196f3", "#ff9800"],
-          },
-        ],
-      },
-    });
-  }
-
-  // Call after load
-  async function loadEvents() {
-    const res = await fetch("/get_events");
-    allEvents = await res.json();
-    renderTable(allEvents);
-    buildChart(allEvents);
-  }
-</script>
 
 <script>
   let allEvents = [];
 
-  async function loadEvents() {
-    const res = await fetch("/get_events");
-    allEvents = await res.json();
-    renderTable(allEvents);
+  function renderTable(events) {
+    const body = document.getElementById("event-table-body");
+    body.innerHTML = "";
+    events.forEach((ev) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${new Date(ev.timestamp).toLocaleString() || "-"}</td>
+        <td>${ev.page_url}</td>
+        <td><span class="badge bg-info text-dark">${ev.action}</span></td>
+        <td style="max-width: 300px; word-wrap: break-word;">${ev.selector}</td>
+      `;
+      body.appendChild(row);
+    });
   }
 
   function applyFilters() {
@@ -82,23 +94,40 @@
     });
 
     renderTable(filtered);
+    buildChart(filtered);
   }
 
-  function renderTable(events) {
-    const body = document.getElementById("event-table-body");
-    body.innerHTML = "";
-    events.forEach((ev) => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-          <td>${ev.timestamp || "-"}</td>
-          <td>${ev.page_url}</td>
-          <td>${ev.action}</td>
-          <td>${ev.selector}</td>
-        `;
-      body.appendChild(row);
+  function buildChart(events) {
+    const counts = { click: 0, hover: 0, submit: 0 };
+    events.forEach((e) => {
+      if (counts[e.action] !== undefined) counts[e.action]++;
     });
+
+    const ctx = document.getElementById("eventChart").getContext("2d");
+    if (window.eventChartInstance) window.eventChartInstance.destroy();
+    window.eventChartInstance = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: Object.keys(counts),
+        datasets: [
+          {
+            label: "# of Events",
+            data: Object.values(counts),
+            backgroundColor: ["#4caf50", "#2196f3", "#ff9800"],
+          },
+        ],
+      },
+      options: { responsive: true, maintainAspectRatio: false },
+    });
+  }
+
+  async function loadEvents() {
+    const res = await fetch("/get_events");
+    allEvents = await res.json();
+    renderTable(allEvents);
   }
 
   loadEvents();
 </script>
+
 {% endblock %}

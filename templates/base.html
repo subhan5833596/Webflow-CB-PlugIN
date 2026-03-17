@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Webflow Tracker</title>
+    <title>CentreBlock Webflow Tracker</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='styles.css') }}"
@@ -14,7 +14,13 @@
     />
   </head>
   <body>
-    <header>Webflow Tracker</header>
+    <header class="header-center">
+      <img
+        src="{{ url_for('static', filename='logo.png') }}"
+        alt="CentreBlock Logo"
+        class="logo"
+      />
+    </header>
     <nav>
       <a href="/">Dashboard</a>
       <a href="/tracking_history">Tracking History</a>
