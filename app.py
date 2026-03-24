@@ -27,8 +27,12 @@ import requests
 
 from supabase import create_client
 
-SUPABASE_URL = "https://dcappavpcbxdcxdurrsp.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjYXBwYXZwY2J4ZGN4ZHVycnNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MzY4ODksImV4cCI6MjA4OTMxMjg4OX0.LWNTG4pca4gzi4hdgtofOf9TzDGo9JyOZLuANlMy3ks"
+# SUPABASE_URL = "https://dcappavpcbxdcxdurrsp.supabase.co"
+# SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjYXBwYXZwY2J4ZGN4ZHVycnNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MzY4ODksImV4cCI6MjA4OTMxMjg4OX0.LWNTG4pca4gzi4hdgtofOf9TzDGo9JyOZLuANlMy3ks"
+import os
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
