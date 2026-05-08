@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% block title %}Trigger Variables — CB Tracker{% endblock %}
+{% set active = 'trigger' %}
+{% block content %}
+
+<h1 class="page-title">Trigger Variables</h1>
+<p class="page-subtitle">Map page elements to CentreBlock variables</p>
+
+<div class="row" style="align-items:flex-start;gap:20px;">
+
+  <div style="flex:1.3;min-width:0;">
+
+    <div class="card mb-4">
+      <div class="card-head"><span class="card-title">Site & Page</span></div>
+      <div class="card-body">
+        <div class="field">
+          <label class="field-label">Website URL</label>
+          <div class="input-row">
+            <input type="url" id="website-url" class="field-input" placeholder="https://yoursite.webflow.io" />
+            <button class="btn btn-primary" id="load-btn" onclick="loadPages()">Load Pages</button>
+          </div>
+        </div>
+        <div class="field" id="page-field" style="display:none;">
+          <label class="field-label">Page</label>
+          <select id="page-url" class="field-select"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4" id="element-card" style="display:none;">
+      <div class="card-head"><span class="card-title">Element</span></div>
+      <div class="card-body">
+        <div class="field">
+          <label class="field-label">Select Element</label>
+          <select id="selector" class="field-select"></select>
+        </div>
+        <div class="g2">
+          <div class="field">
+            <label class="field-label">Tag</label>
+            <input type="text" id="el-tag" class="field-input" readonly />
+          </div>
+          <div class="field">
+            <label class="field-label">Text</label>
+            <input type="text" id="el-text" class="field-input" readonly />
+          </div>
+          <div class="field">
+            <label class="field-label">ID</label>
+            <input type="text" id="el-id" class="field-input" readonly />
+          </div>
+          <div class="field">
+            <label class="field-label">Classes</label>
+            <input type="text" id="el-classes" class="field-input" readonly />
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Event Type</label>
+          <select id="action" class="field-select">
+            <option value="click">Click</option>
+            <option value="submit">Form Submit</option>
+            <option value="mouseover">Hover</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="cb-card" style="display:none;">
+      <div class="card-head" style="background:var(--brand-light);border-bottom-color:var(--brand-border);">
+        <span class="card-title" style="color:var(--brand-dark);">CentreBlock Variable</span>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label class="field-label">Variable Name</label>
+          <input type="text" id="cb-var" class="field-input mono" placeholder="e.g. dartmarketing_home_book_a_call" />
+          <div class="field-hint">Lowercase letters and underscores only</div>
+          <div class="field-error" id="var-err">Variable name is required</div>
+        </div>
+
+        <div class="g3">
+          <div class="field">
+            <label class="field-label">Direction</label>
+            <select id="direction" class="field-select">
+              <option value="Positive">Positive</option>
+              <option value="Neutral" selected>Neutral</option>
+              <option value="Negative">Negative</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Weight — Customer</label>
+            <input type="number" id="w-cust" class="field-input" value="15" min="1" max="100" />
+          </div>
+          <div class="field">
+            <label class="field-label">Weight — Default</label>
+            <input type="number" id="w-def" class="field-input" value="15" min="1" max="100" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Tags Preview</label>
+          <div id="tags-preview" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-secondary);min-height:80px;white-space:pre;"></div>
+        </div>
+
+        <button class="btn btn-primary btn-full" style="margin-top:4px;" onclick="submitRule()">Create Trigger Variable</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="width:300px;flex-shrink:0;">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Active Rules</span>
+        <span class="badge badge-neutral" id="rules-count">0</span>
+      </div>
+      <div id="rules-list">
+        <div class="empty"><div class="empty-title">No rules</div><div class="empty-sub">Add a rule to get started</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function prefillSite() {
+  var sites = Store.get('sites') || [];
+  if (sites.length) document.getElementById('website-url').value = sites[sites.length-1].url;
+}
+
+function updateTagsPreview() {
+  var pageUrl = document.getElementById('page-url').value || '';
+  var slug = 'home';
+  try { slug = new URL(pageUrl).pathname.replace(/^\/|\/$/g,'').split('/').pop() || 'home'; } catch(e) {}
+  var tags = {
+    label: document.getElementById('el-text').value || document.getElementById('el-id').value || 'element',
+    slug: slug,
+    selector: document.getElementById('selector').value || '',
+    element_type: document.getElementById('el-tag').value || '',
+    direction: document.getElementById('direction').value || '',
+  };
+  var id = document.getElementById('el-id').value;
+  if (id) tags.element_id = id;
+  document.getElementById('tags-preview').textContent = JSON.stringify(tags, null, 2);
+}
+
+function suggestVarName() {
+  var pageUrl = document.getElementById('page-url').value || '';
+  var sel = document.getElementById('selector').selectedOptions[0];
+  var siteName = 'site', slug = 'home', hint = 'el';
+  try {
+    var parsed = new URL(pageUrl);
+    var domain = parsed.hostname.replace(/^www\./,'');
+    var raw = domain.split('.')[0].toLowerCase().replace(/[^a-z]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+    siteName = /^[a-z]/.test(raw) ? raw : 'site';
+    var pathOnly = parsed.pathname.replace(/^\/|\/$/g,'');
+    slug = (pathOnly.split('/').pop() || 'home').toLowerCase().replace(/[^a-z]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'') || 'home';
+  } catch(e) {}
+  var rawText = sel ? (sel.dataset.text||'') : '';
+  var rawId   = sel ? (sel.dataset.id||'') : '';
+  var rawTag  = sel ? (sel.dataset.tag||'') : '';
+  var rawCls  = sel ? (sel.dataset.classes||'') : '';
+  var hintRaw = rawText || rawId || rawCls.split(' ')[0] || rawTag || 'el';
+  hint = hintRaw.toLowerCase().replace(/[^a-z]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'').slice(0,25);
+  var parts = [siteName];
+  if (slug !== siteName) parts.push(slug);
+  if (hint !== slug && hint !== siteName) parts.push(hint);
+  document.getElementById('cb-var').value = parts.join('_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+  updateTagsPreview();
+}
+
+async function loadPages() {
+  var url = document.getElementById('website-url').value.trim();
+  if (!url) { toast('Enter a website URL', 'error'); return; }
+  showLoader('Loading pages...');
+  try {
+    var res   = await fetch('/extract_pages?site_url=' + encodeURIComponent(url));
+    var pages = await res.json();
+    hideLoader();
+    if (pages.error) { toast(pages.error, 'error'); return; }
+    var sel = document.getElementById('page-url');
+    sel.innerHTML = pages.map(function(p){ return '<option value="' + p.url + '">' + p.label + '</option>'; }).join('');
+    document.getElementById('page-field').style.display = '';
+    document.getElementById('element-card').style.display = '';
+    document.getElementById('cb-card').style.display = '';
+    if (pages.length) await loadElements(pages[0].url);
+    toast(pages.length + ' pages loaded', 'success');
+  } catch(e) { hideLoader(); toast('Failed: ' + e.message, 'error'); }
+}
+
+async function loadElements(url) {
+  var webUrl = document.getElementById('website-url').value.trim();
+  showLoader('Extracting elements...');
+  try {
+    var res  = await fetch('/get_elements?web_url=' + encodeURIComponent(webUrl) + '&page_url=' + encodeURIComponent(url));
+    var data = await res.json();
+    hideLoader();
+    var ALLOWED = ['a','button','input'];
+    var elements = (data.elements || data || []).filter(function(e){ return ALLOWED.indexOf(e.tag) > -1; });
+    var sel = document.getElementById('selector');
+    sel.innerHTML = elements.map(function(el) {
+      var label = [
+        el.text    ? '"' + el.text + '"' : '',
+        el.tag     ? '<' + el.tag + '>' : '',
+        el.id      ? '#' + el.id : '',
+        el.classes ? '.' + el.classes.split(' ')[0] : '',
+      ].filter(Boolean).join(' | ') || el.selector;
+      return '<option value="' + el.selector + '" data-text="' + (el.text||'') + '" data-tag="' + (el.tag||'') + '" data-id="' + (el.id||'') + '" data-classes="' + (el.classes||'') + '">' + label + '</option>';
+    }).join('');
+    if (elements.length) { sel.selectedIndex = 0; sel.dispatchEvent(new Event('change')); }
+  } catch(e) { hideLoader(); toast('Failed: ' + e.message, 'error'); }
+}
+
+async function submitRule() {
+  var varName = document.getElementById('cb-var').value.trim();
+  var errEl = document.getElementById('var-err');
+  if (!varName) { errEl.classList.add('show'); return; }
+  errEl.classList.remove('show');
+  showLoader('Creating variable...');
+  try {
+    var payload = {
+      website_url: document.getElementById('website-url').value,
+      page_url: document.getElementById('page-url').value,
+      selector: document.getElementById('selector').value,
+      action: document.getElementById('action').value,
+      element_text: document.getElementById('el-text').value,
+      element_tag: document.getElementById('el-tag').value,
+      element_id: document.getElementById('el-id').value,
+      element_classes: document.getElementById('el-classes').value,
+      cb_variable_name: varName,
+      direction: document.getElementById('direction').value,
+      weight_customer: document.getElementById('w-cust').value,
+      weight_default: document.getElementById('w-def').value,
+    };
+    var res    = await fetch('/add_rule', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    var result = await res.json();
+    hideLoader();
+    if (!res.ok) { toast(result.error || 'Request failed', 'error'); return; }
+    if (result.cb_error) toast('Variable error: ' + result.cb_error, 'warning');
+    else if (result.cb_variable && result.cb_variable.skipped) toast('Variable already exists — rule saved', 'info');
+    else toast('Variable "' + varName + '" created', 'success');
+    loadRules();
+  } catch(e) { hideLoader(); toast('Error: ' + e.message, 'error'); }
+}
+
+async function loadRules() {
+  var res   = await fetch('/get_rules');
+  var rules = await res.json();
+  document.getElementById('rules-count').textContent = rules.length;
+  var el = document.getElementById('rules-list');
+  if (!rules.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-title">No rules</div></div>';
+    return;
+  }
+  el.innerHTML = '<div>' + rules.map(function(r) {
+    var dirClass = r.direction === 'Positive' ? 'badge-green' : r.direction === 'Negative' ? 'badge-red' : 'badge-neutral';
+    return '<div style="padding:14px 20px;border-bottom:1px solid var(--border);">'
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">'
+      + '<div style="min-width:0;">'
+      + '<div class="cell-primary truncate" style="font-size:13px;margin-bottom:3px;">' + (r.element_text || r.selector) + '</div>'
+      + '<div class="mono" style="margin-bottom:6px;">' + r.cb_variable_name + '</div>'
+      + '<div class="text-sm text-muted truncate">' + r.page_url + '</div>'
+      + '<div style="display:flex;gap:5px;margin-top:6px;">'
+      + '<span class="badge badge-neutral">' + r.action + '</span>'
+      + '<span class="badge ' + dirClass + '">' + r.direction + '</span>'
+      + '</div></div>'
+      + '<button class="btn btn-sm btn-danger" onclick="deleteRule(\'' + r.rule_id + '\')">Delete</button>'
+      + '</div></div>';
+  }).join('') + '</div>';
+}
+
+async function deleteRule(id) {
+  if (!confirm('Delete this rule?')) return;
+  showLoader('Deleting...');
+  var res = await fetch('/delete_rule/' + id, {method:'DELETE'});
+  hideLoader();
+  var data = await res.json();
+  if (data.error) { toast(data.error, 'error'); return; }
+  toast('Rule deleted', 'info');
+  loadRules();
+}
+
+document.getElementById('load-btn').addEventListener('click', loadPages);
+document.getElementById('website-url').addEventListener('keydown', function(e){ if(e.key==='Enter') loadPages(); });
+document.getElementById('page-url').addEventListener('change', function(e){ loadElements(e.target.value); });
+document.getElementById('selector').addEventListener('change', function() {
+  var sel = document.getElementById('selector').selectedOptions[0];
+  document.getElementById('el-text').value    = sel ? sel.dataset.text    : '';
+  document.getElementById('el-tag').value     = sel ? sel.dataset.tag     : '';
+  document.getElementById('el-id').value      = sel ? sel.dataset.id      : '';
+  document.getElementById('el-classes').value = sel ? sel.dataset.classes : '';
+  suggestVarName();
+});
+document.getElementById('direction').addEventListener('change', updateTagsPreview);
+document.getElementById('cb-var').addEventListener('input', updateTagsPreview);
+
+prefillSite();
+loadRules();
+</script>
+{% endblock %}

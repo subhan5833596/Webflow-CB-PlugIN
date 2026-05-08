@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Event History — CB Tracker{% endblock %}
+{% set active = 'history' %}
+{% block content %}
+
+<div class="flex justify-between items-center mb-4">
+  <div>
+    <h1 class="page-title">Event History</h1>
+    <p class="page-subtitle" style="margin-bottom:0;">Trigger events recorded in this session</p>
+  </div>
+  <button class="btn btn-secondary" onclick="load()">Refresh</button>
+</div>
+
+<div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-label">Total Events</div>
+    <div class="stat-value" id="s-total">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Successful</div>
+    <div class="stat-value" style="color:var(--success);" id="s-ok">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Errors</div>
+    <div class="stat-value" style="color:var(--danger);" id="s-err">0</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <span class="card-title">Events</span>
+    <div class="flex gap-2 items-center">
+      <input type="text" id="f-var" class="field-input" style="width:180px;" placeholder="Filter by variable..." oninput="filter()" />
+      <select id="f-status" class="field-select" style="width:120px;" onchange="filter()">
+        <option value="">All</option>
+        <option value="ok">Success</option>
+        <option value="error">Error</option>
+      </select>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Variable</th>
+          <th>Page</th>
+          <th>Action</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="5"><div class="empty"><div class="empty-title">No events recorded</div><div class="empty-sub">Events appear here when triggered</div></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+var all = [];
+
+async function load() {
+  try {
+    var res = await fetch('/get_events');
+    all = await res.json();
+    var ok = all.filter(function(e){ return !e.cb_error; }).length;
+    document.getElementById('s-total').textContent = all.length;
+    document.getElementById('s-ok').textContent    = ok;
+    document.getElementById('s-err').textContent   = all.length - ok;
+    filter();
+  } catch(e) { toast('Failed: ' + e.message, 'error'); }
+}
+
+function filter() {
+  var q      = document.getElementById('f-var').value.toLowerCase();
+  var status = document.getElementById('f-status').value;
+  var rows   = all.filter(function(e) {
+    var matchQ = !q || (e.variable_name||'').toLowerCase().includes(q);
+    var matchS = !status || (status==='ok' ? !e.cb_error : !!e.cb_error);
+    return matchQ && matchS;
+  });
+  var tbody = document.getElementById('tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="empty-title">No events found</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.slice().reverse().map(function(e) {
+    var status = e.cb_error
+      ? '<span class="badge badge-red">Error</span>'
+      : '<span class="badge badge-green">' + (e.cb_status||200) + '</span>';
+    return '<tr>'
+      + '<td class="text-muted text-sm" style="white-space:nowrap;">' + new Date(e.timestamp).toLocaleTimeString() + '</td>'
+      + '<td><span class="mono">' + (e.variable_name||'—') + '</span></td>'
+      + '<td class="text-muted truncate text-sm" style="max-width:200px;" title="' + (e.page_url||'') + '">' + (e.page_url||'—') + '</td>'
+      + '<td><span class="badge badge-neutral">' + (e.action||'click') + '</span></td>'
+      + '<td>' + status + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+load();
+setInterval(load, 10000);
+</script>
+{% endblock %}

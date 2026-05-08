@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Test Page — CB Tracker{% endblock %}
+{% set active = 'testing' %}
+{% block content %}
+
+<h1 class="page-title">Test Page</h1>
+<p class="page-subtitle">Use <code style="font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg);padding:2px 6px;border-radius:4px;border:1px solid var(--border);">http://127.0.0.1:5000/testing</code> as the website URL in Setup and Trigger Variables</p>
+
+<div class="row" style="align-items:flex-start;gap:20px;">
+
+  <!-- Mock site -->
+  <div style="flex:1.4;min-width:0;">
+    <div class="card" style="overflow:hidden;">
+      <!-- Mock nav -->
+      <div style="background:var(--text-primary);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;">
+        <a href="http://127.0.0.1:5000/testing" style="color:white;font-weight:600;font-size:13.5px;text-decoration:none;">TestSite</a>
+        <div style="display:flex;gap:2px;">
+          <a href="http://127.0.0.1:5000/testing"          id="nav-home"     class="mock-nav">Home</a>
+          <a href="http://127.0.0.1:5000/testing/about"    id="nav-about"    class="mock-nav">About</a>
+          <a href="http://127.0.0.1:5000/testing/services" id="nav-services" class="mock-nav">Services</a>
+          <a href="http://127.0.0.1:5000/testing/contact"  id="nav-contact"  class="mock-nav">Contact</a>
+          <a href="http://127.0.0.1:5000/testing/book"     id="btn-bookcall" class="mock-cta">Book a Call</a>
+        </div>
+      </div>
+
+      <!-- Hero -->
+      <div style="padding:48px 32px;text-align:center;border-bottom:1px solid var(--border);">
+        <h2 style="font-size:24px;font-weight:600;letter-spacing:-0.5px;margin-bottom:8px;">Welcome to TestSite</h2>
+        <p style="color:var(--text-secondary);font-size:14px;margin-bottom:24px;">Click any element to test CentreBlock trigger firing</p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <a href="http://127.0.0.1:5000/testing/book"  id="btn-getstarted" style="background:var(--brand);color:white;text-decoration:none;padding:10px 22px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:500;">Get Started</a>
+          <a href="http://127.0.0.1:5000/testing/learn" id="btn-learnmore"  style="border:1px solid var(--border-dark);color:var(--text-primary);text-decoration:none;padding:10px 22px;border-radius:var(--radius-sm);font-size:13.5px;">Learn More</a>
+        </div>
+      </div>
+
+      <!-- Services -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--border);">
+        <div style="padding:24px;border-right:1px solid var(--border);text-align:center;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Design</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Creative direction</div>
+          <a href="http://127.0.0.1:5000/testing/service1" id="btn-service1" style="font-size:12px;color:var(--brand);text-decoration:none;font-weight:500;border:1px solid var(--brand-border);padding:5px 12px;border-radius:var(--radius-sm);background:var(--brand-light);">Explore</a>
+        </div>
+        <div style="padding:24px;border-right:1px solid var(--border);text-align:center;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Marketing</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Growth strategy</div>
+          <a href="http://127.0.0.1:5000/testing/service2" id="btn-service2" style="font-size:12px;color:var(--brand);text-decoration:none;font-weight:500;border:1px solid var(--brand-border);padding:5px 12px;border-radius:var(--radius-sm);background:var(--brand-light);">Explore</a>
+        </div>
+        <div style="padding:24px;text-align:center;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Development</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Engineering teams</div>
+          <a href="http://127.0.0.1:5000/testing/service3" id="btn-service3" style="font-size:12px;color:var(--brand);text-decoration:none;font-weight:500;border:1px solid var(--brand-border);padding:5px 12px;border-radius:var(--radius-sm);background:var(--brand-light);">Explore</a>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div style="padding:20px 24px;background:var(--bg);">
+        <div style="font-size:12.5px;font-weight:500;margin-bottom:10px;color:var(--text-secondary);">Newsletter</div>
+        <div style="display:flex;gap:8px;max-width:360px;">
+          <input type="email" id="email-input" placeholder="your@email.com" style="flex:1;padding:8px 11px;border:1px solid var(--border-dark);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;" />
+          <input type="submit" id="btn-submit" value="Subscribe" style="background:var(--text-primary);color:white;border:none;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-family:inherit;font-weight:500;cursor:pointer;" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Console -->
+  <div style="width:280px;flex-shrink:0;">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Tracker Console</span>
+        <button class="btn btn-sm btn-ghost" onclick="clearLog()">Clear</button>
+      </div>
+      <div id="log" style="padding:12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;min-height:200px;max-height:400px;overflow-y:auto;background:var(--bg);border-radius:0 0 var(--radius-lg) var(--radius-lg);"></div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.mock-nav { color:rgba(255,255,255,0.7);text-decoration:none;padding:5px 10px;border-radius:4px;font-size:12.5px;transition:color 0.15s; }
+.mock-nav:hover { color:white; }
+.mock-cta { background:var(--brand);color:white;text-decoration:none;padding:5px 14px;border-radius:4px;font-size:12.5px;font-weight:500; }
+</style>
+
+{% endblock %}
+{% block scripts %}
+<script>
+function logLine(msg, type) {
+  var colors = {info:'var(--text-secondary)',success:'var(--success)',error:'var(--danger)',warn:'var(--warning)'};
+  var el = document.getElementById('log');
+  var line = document.createElement('div');
+  line.style.color = colors[type||'info'];
+  line.style.marginBottom = '4px';
+  line.style.lineHeight = '1.5';
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+function clearLog() { document.getElementById('log').innerHTML = ''; }
+
+var _log = console.log.bind(console);
+var _warn = console.warn.bind(console);
+var _err = console.error.bind(console);
+console.log   = function() { _log.apply(console,arguments); var m=Array.from(arguments).join(' '); if(m.includes('[CB]')) logLine(m, m.includes('failed')?'error':'success'); };
+console.warn  = function() { _warn.apply(console,arguments); var m=Array.from(arguments).join(' '); if(m.includes('[CB]')) logLine(m,'warn'); };
+console.error = function() { _err.apply(console,arguments);  logLine(Array.from(arguments).join(' '),'error'); };
+</script>
+<script src="{{ url_for('static', filename='tracker.js') }}"></script>
+{% endblock %}

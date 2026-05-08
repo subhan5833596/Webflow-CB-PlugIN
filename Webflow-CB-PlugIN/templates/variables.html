@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Variables — CB Tracker{% endblock %}
+{% set active = 'variables' %}
+{% block content %}
+
+<div class="flex justify-between items-center mb-4">
+  <div>
+    <h1 class="page-title">Variables</h1>
+    <p class="page-subtitle" style="margin-bottom:0;">All CentreBlock variables for this account</p>
+  </div>
+  <button class="btn btn-secondary" onclick="load()">Refresh</button>
+</div>
+
+<div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+  <div class="stat-card">
+    <div class="stat-label">Total</div>
+    <div class="stat-value" id="s-total">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">This Site</div>
+    <div class="stat-value" id="s-site">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Last Refresh</div>
+    <div class="stat-value" id="s-time" style="font-size:18px;letter-spacing:0;">—</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <span class="card-title">All Variables</span>
+    <div class="flex gap-2 items-center">
+      <input type="text" id="q" class="field-input" style="width:180px;" placeholder="Search variables..." oninput="filter()" />
+      <select id="f-site" class="field-select" style="width:150px;" onchange="filter()">
+        <option value="">All sites</option>
+      </select>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Weight</th>
+          <th>Tags</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="4"><div class="empty"><div class="empty-title">Loading...</div></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+var all = [];
+
+async function load() {
+  showLoader('Fetching variables...');
+  try {
+    var res  = await fetch('/cb_variables');
+    var data = await res.json();
+    hideLoader();
+    if (data.error) { toast(data.error, 'error'); return; }
+    all = data;
+    document.getElementById('s-total').textContent = all.length;
+    document.getElementById('s-time').textContent  = new Date().toLocaleTimeString();
+
+    var domain   = window.location.hostname.replace(/^www\./,'');
+    var rawSite  = domain.split('.')[0].toLowerCase().replace(/[^a-z]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+    var siteName = /^[a-z]/.test(rawSite) ? rawSite : 'site';
+    document.getElementById('s-site').textContent  = all.filter(function(v){ return v.name && v.name.startsWith(siteName+'_'); }).length;
+
+    var prefixes = [];
+    all.forEach(function(v){ var p = (v.name||'').split('_')[0]; if(p && prefixes.indexOf(p)===-1) prefixes.push(p); });
+    prefixes.sort();
+    var fs = document.getElementById('f-site');
+    fs.innerHTML = '<option value="">All sites</option>' + prefixes.map(function(p){ return '<option value="'+p+'">'+p+'</option>'; }).join('');
+
+    filter();
+    toast(all.length + ' variables loaded', 'success');
+  } catch(e) { hideLoader(); toast('Failed: ' + e.message, 'error'); }
+}
+
+function filter() {
+  var q    = document.getElementById('q').value.toLowerCase();
+  var site = document.getElementById('f-site').value;
+  var rows = all.filter(function(v) {
+    var name = v.name || '';
+    return (!q || name.includes(q)) && (!site || name.startsWith(site+'_'));
+  });
+  var tbody = document.getElementById('tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4"><div class="empty"><div class="empty-title">No variables found</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(function(v) {
+    var prefix = (v.name||'').split('_')[0];
+    return '<tr>'
+      + '<td><span class="mono" style="color:var(--brand-dark);">' + (v.name||'—') + '</span>'
+      + ' <span class="badge badge-neutral" style="margin-left:6px;">' + prefix + '</span></td>'
+      + '<td><span class="badge badge-purple">' + (v.category||'—') + '</span></td>'
+      + '<td style="font-weight:500;">' + (v.weight||'—') + '</td>'
+      + '<td class="text-muted text-sm">' + (v.tag||'—') + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+load();
+</script>
+{% endblock %}
