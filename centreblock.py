@@ -56,6 +56,19 @@ def get_or_create_consumer(
     if audiences is None:
         audiences = ["default"]
 
+    import re
+
+    def sanitize_tag(val):
+        # CB tags: only alphanumeric allowed in keys and values
+        return re.sub(r"[^a-zA-Z0-9]", "", str(val))
+
+    raw_tags = tags or {}
+    clean_tags = {
+        sanitize_tag(k): sanitize_tag(v)
+        for k, v in raw_tags.items()
+        if sanitize_tag(k) and sanitize_tag(v)
+    }
+
     now = datetime.utcnow().isoformat()
     payload = {
         "uuid": uuid,
@@ -63,10 +76,7 @@ def get_or_create_consumer(
         "createdAt": now,
         "audiences": audiences,
         "tokenTimeToLive": token_ttl,
-        "tags": {
-            "token_request_ts": now,
-            **(tags or {}),
-        },
+        "tags": clean_tags,
     }
 
     print(f"CB Consumer Payload: {payload}")
