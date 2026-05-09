@@ -11,8 +11,7 @@
  *  4. Click hua → variable se match karo → /fire_trigger call karo
  */
 
-const BACKEND_URL =
-  "https://centreblock-webflow-tracker-h6c7c6c2bdawgeh4.canadacentral-01.azurewebsites.net"; // same origin, ya "https://your-backend.com"
+const BACKEND_URL = "https://centreblock-webflow-tracker-h6c7c6c2bdawgeh4.canadacentral-01.azurewebsites.net";
 
 // ────────────────────────────────────────────
 // 1. Consumer Token
@@ -173,7 +172,8 @@ async function fireTrigger(variableName, consumerToken) {
 // Main
 // ────────────────────────────────────────────
 
-window.addEventListener("load", async () => {
+// DOMContentLoaded ya load — jo bhi pehle available ho
+function initTracker() {
   try {
     const [consumerToken, variables] = await Promise.all([
       fetchConsumerToken(),
@@ -210,4 +210,11 @@ window.addEventListener("load", async () => {
   } catch (err) {
     console.error("[CB] Tracker error:", err);
   }
-});
+}
+
+// Run immediately if page already loaded, otherwise wait
+if (document.readyState === "complete" || document.readyState === "interactive") {
+  initTracker();
+} else {
+  window.addEventListener("DOMContentLoaded", initTracker);
+}
