@@ -11,7 +11,8 @@
  *  4. Click hua → variable se match karo → /fire_trigger call karo
  */
 
-const BACKEND_URL = ""; // same origin, ya "https://your-backend.com"
+const BACKEND_URL =
+  "https://centreblock-webflow-tracker-h6c7c6c2bdawgeh4.canadacentral-01.azurewebsites.net"; // same origin, ya "https://your-backend.com"
 
 // ────────────────────────────────────────────
 // 1. Consumer Token
