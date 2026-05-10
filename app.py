@@ -64,7 +64,12 @@ def _get_selector(tag) -> str | None:
 
 
 def _scrape_pages(site_url: str) -> list[dict]:
-    """Return a deduplicated list of {label, url} for all in-domain links."""
+    """
+    Return deduplicated pages from a site.
+    Priority: nav/header/footer links first (most reliable page links),
+    then all other internal links.
+    Label = slug from URL path (e.g. /about-us -> about-us).
+    """
     res = http.get(site_url, timeout=10)
     res.raise_for_status()
     soup = BeautifulSoup(res.text, "html.parser")
@@ -73,20 +78,33 @@ def _scrape_pages(site_url: str) -> list[dict]:
     pages: list[dict] = []
     base_domain = urlparse(site_url).netloc
 
-    for a in soup.find_all("a", href=True):
-        href = a["href"].strip()
-        if href.startswith("#") or "mailto:" in href or href.startswith("javascript:"):
-            continue
+    def add_link(a_tag):
+        href = a_tag.get("href", "").strip()
+        if not href or href.startswith("#") or "mailto:" in href or href.startswith("javascript:"):
+            return
         full = urljoin(site_url, href)
         parsed = urlparse(full)
         if parsed.netloc != base_domain:
-            continue
+            return
         if full in seen:
-            continue
+            return
         seen.add(full)
-        path = parsed.path.rstrip("/")
-        label = a.get_text(strip=True)[:40] or (path.split("/")[-1] or "index")
+
+        # Label = slug from path (e.g. /about-us -> "about-us"), fallback to link text
+        path = parsed.path.strip("/")
+        slug = path.split("/")[-1] if path else ""
+        label = slug or a_tag.get_text(strip=True)[:40] or "home"
         pages.append({"label": label, "url": full})
+
+    # Priority 1 — nav, header, footer (most reliable navigation links)
+    NAV_TAGS = ["nav", "header", "footer"]
+    for container in soup.find_all(NAV_TAGS):
+        for a in container.find_all("a", href=True):
+            add_link(a)
+
+    # Priority 2 — all other links on page
+    for a in soup.find_all("a", href=True):
+        add_link(a)
 
     return pages
 

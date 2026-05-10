@@ -155,21 +155,29 @@ def create_variable(
     if variable_exists(clean_name):
         return {"skipped": True, "name": clean_name, "message": "Variable already exists"}
 
-    # Tags build karo — whitepaper ke according
-    variable_tags = tags or {}
-    if leaving_link:
-        variable_tags["leaving_link"] = leaving_link   # outbound URL — whitepaper section 6.2
-    if label:
-        variable_tags["label"] = label                 # human readable label
+    import re as _re
 
+    def _clean(v):
+        return _re.sub(r"[^a-zA-Z0-9]", "", str(v))
+
+    # Only label tag — alphanumeric only (CB requirement)
+    variable_tags = {}
+    if label:
+        variable_tags["label"] = _clean(label)
+
+    # Build payload
     payload = {
         "name": clean_name,
         "categories": {
             "customer": weight_for_customer,
-            "default": weight_for_default,
+            "default":  weight_for_default,
         },
         "tags": variable_tags,
     }
+
+    # leaving_link — top level field, full URL allowed
+    if leaving_link:
+        payload["leavingLink"] = leaving_link
 
     print(f"CB Variable Payload: {payload}")
     resp = requests.post(
