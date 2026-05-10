@@ -9,9 +9,13 @@
   // 1. Consumer Token
   async function fetchConsumerToken() {
     var cached = sessionStorage.getItem("_cb_token");
-    if (cached) return cached;
+    if (cached) {
+      console.log("[CB] Token from cache");
+      return cached;
+    }
 
     var websiteDomain = window.location.host.replace(":", "_");
+    console.log("[CB] Fetching token for uuid:", websiteDomain);
 
     var res = await fetch(BACKEND_URL + "/get_consumer_token", {
       method: "POST",
@@ -27,20 +31,23 @@
     var data = await res.json();
     if (data.token) {
       sessionStorage.setItem("_cb_token", data.token);
-      console.log("[CB] Consumer token mila");
+      console.log("[CB] Token received:", data.token.slice(0, 20) + "...");
       return data.token;
     }
-    console.warn("[CB] Token nahi mila:", data);
+    console.warn("[CB] Token failed:", data);
     return null;
   }
 
-  // 2. Fetch Rules — exact selector + variable name mapping
-  async function fetchVariables() {
+  // 2. Fetch Rules
+  async function fetchRules() {
+    console.log("[CB] Fetching rules...");
     var res = await fetch(BACKEND_URL + "/get_rules");
     var rules = await res.json();
 
-    // Filter rules for current site
     var currentHost = window.location.hostname.replace(/^www\./, "");
+    var currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+    console.log("[CB] Current host:", currentHost, "| path:", currentPath);
+
     var siteRules = rules.filter(function (r) {
       if (!r.website_url) return false;
       try {
@@ -52,38 +59,116 @@
     });
 
     console.log(
-      "[CB] Rules: " +
-        rules.length +
-        " total, " +
-        siteRules.length +
-        ' for "' +
-        currentHost +
-        '"',
+      "[CB] Total rules:",
+      rules.length,
+      "| Site rules:",
+      siteRules.length,
     );
+    siteRules.forEach(function (r) {
+      console.log(
+        "[CB] Rule:",
+        r.cb_variable_name,
+        "| page:",
+        r.page_url,
+        "| selector:",
+        r.selector,
+        "| text:",
+        r.element_text,
+      );
+    });
     return siteRules;
   }
 
-  // 3. Match element — exact selector match from rules
-  function matchVariable(element, rules) {
+  // 3. Match element
+  function matchRule(element, rules) {
+    var currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+
     for (var i = 0; i < rules.length; i++) {
       var rule = rules[i];
-      if (!rule.selector) continue;
 
-      // Check if this element matches the rule selector
-      try {
-        var matched = document.querySelectorAll(rule.selector);
-        for (var j = 0; j < matched.length; j++) {
-          if (matched[j] === element) {
-            console.log(
-              '[CB] Match: "' +
-                element.textContent.trim() +
-                '" -> ' +
-                rule.cb_variable_name,
-            );
-            return rule;
+      // Page check
+      if (rule.page_url) {
+        try {
+          var rulePath =
+            new URL(rule.page_url).pathname.replace(/\/+$/, "") || "/";
+          if (rulePath !== currentPath) continue;
+        } catch (e) {
+          continue;
+        }
+      }
+
+      var matched = false;
+
+      // Strategy 1: #id selector
+      if (rule.selector && rule.selector.startsWith("#")) {
+        try {
+          var el = document.querySelector(rule.selector);
+          if (el && el === element) matched = true;
+        } catch (e) {}
+      }
+
+      // Strategy 2: tag + text + class
+      if (!matched && rule.element_text && rule.element_tag) {
+        var elText = element.textContent.trim();
+        var elTag = element.tagName.toLowerCase();
+        if (
+          elTag === rule.element_tag.toLowerCase() &&
+          elText === rule.element_text.trim()
+        ) {
+          if (rule.element_classes) {
+            var ruleFirstClass = rule.element_classes.split(" ")[0];
+            if (element.classList.contains(ruleFirstClass)) matched = true;
+          } else {
+            matched = true;
           }
         }
-      } catch (e) {}
+      }
+
+      // Strategy 3: nth-of-type manual count
+      if (!matched && rule.selector && !rule.selector.startsWith("#")) {
+        try {
+          var selectorBase = rule.selector
+            .replace(/:nth-of-type\(\d+\)/g, "")
+            .replace(/:nth-child\(\d+\)/g, "");
+          var nthMatch = rule.selector.match(/:nth-of-type\((\d+)\)/);
+          var nthIndex = nthMatch ? parseInt(nthMatch[1]) - 1 : -1;
+
+          if (nthIndex >= 0) {
+            var candidates = document.querySelectorAll(selectorBase);
+            console.log(
+              "[CB] Strategy 3 — selector:",
+              selectorBase,
+              "| nth:",
+              nthIndex,
+              "| found:",
+              candidates.length,
+              "elements",
+            );
+            if (candidates[nthIndex] && candidates[nthIndex] === element)
+              matched = true;
+          } else {
+            var els = document.querySelectorAll(selectorBase);
+            for (var k = 0; k < els.length; k++) {
+              if (els[k] === element) {
+                matched = true;
+                break;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("[CB] Strategy 3 error:", e);
+        }
+      }
+
+      if (matched) {
+        console.log(
+          "[CB] MATCHED:",
+          element.textContent.trim(),
+          "->",
+          rule.cb_variable_name,
+        );
+        return rule;
+      }
     }
     return null;
   }
@@ -94,7 +179,8 @@
       console.warn("[CB] No variable name");
       return;
     }
-    console.log("[CB] Firing: " + variableName);
+    console.log("[CB] Firing trigger:", variableName);
+
     var res = await fetch(BACKEND_URL + "/fire_trigger", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -105,26 +191,29 @@
         direction: "Neutral",
       }),
     });
+
     var data = await res.json().catch(function () {
       return {};
     });
-    if (res.ok) console.log("[CB] Trigger fired: " + variableName, data);
-    else console.warn("[CB] Trigger failed [" + res.status + "]:", data);
+    if (res.ok)
+      console.log("[CB] Trigger fired successfully:", variableName, data);
+    else console.warn("[CB] Trigger FAILED [" + res.status + "]:", data);
     return data;
   }
 
   // Main
   async function initTracker() {
+    console.log("[CB] Tracker initializing...");
     try {
       var consumerToken = await fetchConsumerToken();
-      var variables = await fetchVariables();
+      var rules = await fetchRules();
 
       if (!consumerToken) {
-        console.warn("[CB] Token nahi mila, stop.");
+        console.warn("[CB] No token — stopping");
         return;
       }
-      if (!variables.length) {
-        console.warn("[CB] Koi variables nahi mile.");
+      if (!rules.length) {
+        console.warn("[CB] No rules — stopping");
         return;
       }
 
@@ -132,24 +221,35 @@
         "a, button, input[type=submit], input[type=button]",
       );
       console.log(
-        "[CB] " +
-          clickables.length +
-          " elements, " +
-          variables.length +
-          " variables ready",
+        "[CB] Attaching listeners to",
+        clickables.length,
+        "elements for",
+        rules.length,
+        "rules",
       );
 
       clickables.forEach(function (el) {
         el.addEventListener(
           "click",
           async function () {
-            var matched = matchVariable(el, variables);
-            if (!matched) return;
+            console.log(
+              "[CB] Click detected on:",
+              el.tagName,
+              "|",
+              el.textContent.trim().slice(0, 30),
+            );
+            var matched = matchRule(el, rules);
+            if (!matched) {
+              console.log("[CB] No rule matched for this element");
+              return;
+            }
             await fireTrigger(matched.cb_variable_name, consumerToken);
           },
           true,
         );
       });
+
+      console.log("[CB] Tracker ready");
     } catch (err) {
       console.error("[CB] Tracker error:", err);
     }
