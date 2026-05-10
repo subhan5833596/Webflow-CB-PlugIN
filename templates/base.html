@@ -46,10 +46,21 @@
       <nav class="sidebar-nav">
         <div class="nav-group">
           <span class="nav-group-label">General</span>
-          <!-- <a href="/" class="nav-link {% if active=='home' %}active{% endif %}">
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5L1.5 7h2v6h3v-4h2v4h3V7h2L7.5 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg>
-        Dashboard
-      </a> -->
+          <a
+            href="/dashboard"
+            class="nav-link {% if active=='home' %}active{% endif %}"
+          >
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <path
+                d="M7.5 1.5L1.5 7h2v6h3v-4h2v4h3V7h2L7.5 1.5z"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linejoin="round"
+                fill="none"
+              />
+            </svg>
+            Dashboard
+          </a>
           <a
             href="/setup_page"
             class="nav-link {% if active=='setup' %}active{% endif %}"
@@ -127,7 +138,7 @@
             </svg>
             View Variables
           </a>
-          <!-- <a
+          <a
             href="/tracking_history"
             class="nav-link {% if active=='history' %}active{% endif %}"
           >
@@ -146,10 +157,10 @@
               />
             </svg>
             Event History
-          </a> -->
+          </a>
         </div>
 
-        <!-- <div class="nav-group">
+        <div class="nav-group">
           <span class="nav-group-label">Developer</span>
           <a
             href="/testing"
@@ -165,7 +176,7 @@
             </svg>
             Test Page
           </a>
-        </div> -->
+        </div>
       </nav>
     </aside>
 
