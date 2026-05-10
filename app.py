@@ -171,8 +171,18 @@ def _suggest_variable_name(element: dict, page_url: str) -> str:
 # Routes — pages
 # ──────────────────────────────────────────────
 
+# Yeh
 @app.route("/")
 def index():
+    return render_template("index.html")
+
+# Yeh karo
+@app.route("/")
+def index():
+    return render_template("setup.html")
+
+@app.route("/dashboard")
+def dashboard():
     return render_template("index.html")
 
 
@@ -186,9 +196,6 @@ def tracking_history():
     return render_template("tracking_history.html")
 
 
-@app.route("/setup_page")
-def setup_page():
-    return render_template("setup.html")
 
 
 @app.route("/testing")
