@@ -110,38 +110,67 @@ def _scrape_pages(site_url: str) -> list[dict]:
 
 
 def _scrape_elements(page_url: str) -> list[dict]:
-    """Return clickable elements from a page — deduplicated by text+class."""
+    """
+    Return all clickable elements — no deduplication.
+    Every button/link gets a unique nth-of-type selector.
+    EXTENSIBLE: Add more types to ALLOWED_ELEMENT_TYPES as needed.
+    """
     res = http.get(page_url, timeout=10)
     res.raise_for_status()
     soup = BeautifulSoup(res.text, "html.parser")
 
-    elements: list[dict] = []
-    seen_keys: set[str] = set()
-
     # EXTENSIBLE: Add more types here as needed e.g. "select", "textarea"
     ALLOWED_ELEMENT_TYPES = ["a", "button", "input"]
-    for tag in soup.find_all(ALLOWED_ELEMENT_TYPES):
-        selector = _get_selector(tag)
-        if not selector:
-            continue
+    all_tags = soup.find_all(ALLOWED_ELEMENT_TYPES)
 
-        text    = tag.get_text(strip=True)[:60]
-        classes = " ".join(tag.get("class", []))
+    elements: list[dict] = []
+
+    for idx, tag in enumerate(all_tags):
         tag_name = tag.name
+        text     = tag.get_text(strip=True)[:60]
+        classes  = " ".join(tag.get("class", []))
+        el_id    = tag.get("id", "")
+        href     = tag.get("href", "") if tag_name == "a" else ""
 
-        # Deduplicate — same text + same first class = same element
-        dedup_key = f"{tag_name}|{text}|{classes.split()[0] if classes else ''}"
-        if dedup_key in seen_keys:
+        # Skip truly empty elements
+        if not text and not el_id and not classes and not href:
             continue
-        seen_keys.add(dedup_key)
+
+        # Build unique selector
+        if el_id:
+            selector = f"#{el_id}"
+        else:
+            first_class = classes.split()[0] if classes else ""
+            same_before = sum(1 for t in all_tags[:idx] if t.name == tag_name)
+            if first_class:
+                selector = f"{tag_name}.{first_class}:nth-of-type({same_before + 1})"
+            else:
+                selector = f"{tag_name}:nth-of-type({same_before + 1})"
+
+        # Parent section context for disambiguation in dropdown
+        parent_context = ""
+        for parent in tag.parents:
+            if parent.name in ["section", "div", "article", "main", "header", "footer", "nav"]:
+                parent_id  = parent.get("id", "")
+                parent_cls = " ".join(parent.get("class", []))
+                if parent_id:
+                    parent_context = parent_id
+                    break
+                elif parent_cls:
+                    parent_context = parent_cls.split()[0]
+                    break
 
         elements.append({
             "tag":      tag_name,
             "text":     text,
-            "id":       tag.get("id", ""),
+            "id":       el_id,
             "classes":  classes,
             "selector": selector,
+            "href":     href,
+            "context":  parent_context,
+            "index":    idx,
         })
+
     return elements
 
 

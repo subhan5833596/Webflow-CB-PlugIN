@@ -170,27 +170,20 @@ endblock %} {% set active = 'trigger' %} {% block content %}
   }
 
   function updateTagsPreview() {
-    var pageUrl = document.getElementById("page-url").value || "";
-    var slug = "home";
-    try {
-      slug =
-        new URL(pageUrl).pathname
-          .replace(/^\/|\/$/g, "")
-          .split("/")
-          .pop() || "home";
-    } catch (e) {}
-    var tags = {
-      label:
-        document.getElementById("el-text").value ||
-        document.getElementById("el-id").value ||
-        "element",
-      slug: slug,
-      selector: document.getElementById("selector").value || "",
-      element_type: document.getElementById("el-tag").value || "",
-      direction: document.getElementById("direction").value || "",
-    };
-    var id = document.getElementById("el-id").value;
-    if (id) tags.element_id = id;
+    var label =
+      document.getElementById("el-text").value ||
+      document.getElementById("el-id").value ||
+      "element";
+    var href =
+      document.getElementById("selector").selectedOptions[0]?.dataset.href ||
+      "";
+    var siteUrl = document.getElementById("website-url").value || "";
+    var isOutbound =
+      href && siteUrl && !href.startsWith(siteUrl) && href.startsWith("http");
+
+    var tags = { label: label };
+    if (isOutbound) tags.leavingLink = href;
+
     document.getElementById("tags-preview").textContent = JSON.stringify(
       tags,
       null,
