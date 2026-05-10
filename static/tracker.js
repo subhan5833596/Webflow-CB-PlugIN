@@ -194,10 +194,33 @@
       clickables.forEach(function (el) {
         el.addEventListener(
           "click",
-          async function () {
+          async function (e) {
             var matched = matchVariable(el, variables);
             if (!matched) return;
+
+            // Stop navigation briefly so trigger can fire
+            var href = el.getAttribute("href");
+            var isLink =
+              el.tagName.toLowerCase() === "a" &&
+              href &&
+              !href.startsWith("#") &&
+              href !== "javascript:void(0)";
+
+            if (isLink) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+
             await fireTrigger(matched.name, consumerToken);
+
+            // Resume navigation after trigger
+            if (isLink) {
+              if (el.target === "_blank") {
+                window.open(href, "_blank");
+              } else {
+                window.location.href = href;
+              }
+            }
           },
           true,
         );
