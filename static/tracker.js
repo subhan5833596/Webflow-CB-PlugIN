@@ -191,40 +191,48 @@
         "variables",
       );
 
-      clickables.forEach(function (el) {
-        el.addEventListener(
-          "click",
-          async function (e) {
-            var matched = matchVariable(el, variables);
-            if (!matched) return;
+      // Attach to document level to catch all clicks before navigation
+      document.addEventListener(
+        "click",
+        async function (e) {
+          // Find the actual anchor/button that was clicked
+          var el = e.target;
+          while (el && el !== document) {
+            if (
+              el.tagName &&
+              ["A", "BUTTON", "INPUT"].indexOf(el.tagName.toUpperCase()) > -1
+            )
+              break;
+            el = el.parentElement;
+          }
+          if (!el || el === document) return;
 
-            // Stop navigation briefly so trigger can fire
-            var href = el.getAttribute("href");
-            var isLink =
-              el.tagName.toLowerCase() === "a" &&
-              href &&
-              !href.startsWith("#") &&
-              href !== "javascript:void(0)";
+          var matched = matchVariable(el, variables);
+          if (!matched) return;
 
-            if (isLink) {
-              e.preventDefault();
-              e.stopPropagation();
-            }
+          // Stop navigation
+          e.preventDefault();
+          e.stopImmediatePropagation();
 
-            await fireTrigger(matched.name, consumerToken);
+          var href = el.getAttribute("href");
+          var isLink =
+            el.tagName === "A" &&
+            href &&
+            href !== "#" &&
+            href.indexOf("javascript") === -1;
+          var isBlank = el.target === "_blank";
 
-            // Resume navigation after trigger
-            if (isLink) {
-              if (el.target === "_blank") {
-                window.open(href, "_blank");
-              } else {
-                window.location.href = href;
-              }
-            }
-          },
-          true,
-        );
-      });
+          // Fire trigger
+          await fireTrigger(matched.name, consumerToken);
+
+          // Then navigate
+          if (isLink) {
+            if (isBlank) window.open(href, "_blank");
+            else window.location.href = href;
+          }
+        },
+        true,
+      );
     } catch (err) {
       console.error("[CB] Error:", err);
     }
