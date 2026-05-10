@@ -9,7 +9,7 @@ import json
 from datetime import datetime, timezone
 from urllib.parse import urljoin, urlparse
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 from bs4 import BeautifulSoup
 import requests as http
@@ -21,16 +21,48 @@ import centreblock as cb
 # ──────────────────────────────────────────────
 
 app = Flask(__name__)
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+
+@app.after_request
+def add_no_cache(response):
+    if request.path.endswith(".js") or request.path.endswith(".css"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+    return response
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
+import os, json as _json
+
 # ──────────────────────────────────────────────
-# In-memory stores  (reset on dyno restart — fine for stateless design)
+# Persistent storage — JSON files
 # ──────────────────────────────────────────────
 
-_site_pages: dict[str, list[dict]] = {}    # web_url  → [{label, url}, …]
-_page_elements: dict[str, list[dict]] = {} # page_url → [{tag, text, id, classes, selector}, …]
-_rules: list[dict] = []                    # tracking rules
-_events: list[dict] = []                   # fired trigger log (in-process only)
+DATA_DIR   = os.path.join(os.path.dirname(__file__), "data")
+RULES_FILE = os.path.join(DATA_DIR, "rules.json")
+
+os.makedirs(DATA_DIR, exist_ok=True)
+
+def _load_rules() -> list:
+    try:
+        if os.path.exists(RULES_FILE):
+            with open(RULES_FILE, "r") as f:
+                return _json.load(f)
+    except Exception:
+        pass
+    return []
+
+def _save_rules(rules: list):
+    try:
+        with open(RULES_FILE, "w") as f:
+            _json.dump(rules, f, indent=2)
+    except Exception as e:
+        print(f"Rules save error: {e}")
+
+# In-memory stores
+_site_pages: dict[str, list[dict]] = {}
+_page_elements: dict[str, list[dict]] = {}
+_rules: list[dict] = _load_rules()          # Load from file on startup
+_events: list[dict] = []
 
 
 # ──────────────────────────────────────────────
@@ -465,6 +497,7 @@ def add_rule():
         "direction": data.get("direction", "Positive"),
     }
     _rules.append(rule)
+    _save_rules(_rules)
 
     return jsonify({
         "message": "Rule added",
@@ -485,6 +518,7 @@ def delete_rule(rule_id: str):
     before = len(_rules)
     _rules = [r for r in _rules if r["rule_id"] != rule_id]
     if len(_rules) < before:
+        _save_rules(_rules)
         return jsonify({"message": f"Rule {rule_id} deleted"})
     return jsonify({"error": "Rule not found"}), 404
 
@@ -702,6 +736,9 @@ def test_trigger():
     except Exception as e:
         print(f"❌ Error: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+
 
 
 if __name__ == "__main__":
