@@ -34,101 +34,66 @@
     return null;
   }
 
-  // 2. CB Variables
+  // 2. Fetch Rules — exact selector + variable name mapping
   async function fetchVariables() {
-    var cached = sessionStorage.getItem("_cb_variables");
-    if (cached) return JSON.parse(cached);
+    var res = await fetch(BACKEND_URL + "/get_rules");
+    var rules = await res.json();
 
-    var res = await fetch(BACKEND_URL + "/cb_variables");
-    var vars = await res.json();
-
-    var domain = window.location.hostname.replace(/^www\./, "");
-    var rawSite = domain
-      .split(".")[0]
-      .toLowerCase()
-      .replace(/[^a-z]/g, "_")
-      .replace(/_+/g, "_")
-      .replace(/^_|_$/g, "");
-    var prefix = /^[a-z]/.test(rawSite) ? rawSite : "site";
-
-    var filtered = vars.filter(function (v) {
-      return v.name && v.name.startsWith(prefix + "_");
+    // Filter rules for current site
+    var currentHost = window.location.hostname.replace(/^www\./, "");
+    var siteRules = rules.filter(function (r) {
+      if (!r.website_url) return false;
+      try {
+        var ruleHost = new URL(r.website_url).hostname.replace(/^www\./, "");
+        return ruleHost === currentHost;
+      } catch (e) {
+        return false;
+      }
     });
+
     console.log(
-      "[CB] Variables: " +
-        vars.length +
+      "[CB] Rules: " +
+        rules.length +
         " total, " +
-        filtered.length +
+        siteRules.length +
         ' for "' +
-        prefix +
+        currentHost +
         '"',
     );
-
-    sessionStorage.setItem("_cb_variables", JSON.stringify(filtered));
-    return filtered;
+    return siteRules;
   }
 
-  // 3. Match element
-  function matchVariable(element, variables) {
-    var domain = window.location.hostname.replace(/^www\./, "");
-    var rawSite = domain
-      .split(".")[0]
-      .toLowerCase()
-      .replace(/[^a-z]/g, "_")
-      .replace(/_+/g, "_")
-      .replace(/^_|_$/g, "");
-    var siteName = /^[a-z]/.test(rawSite) ? rawSite : "site";
+  // 3. Match element — exact selector match from rules
+  function matchVariable(element, rules) {
+    for (var i = 0; i < rules.length; i++) {
+      var rule = rules[i];
+      if (!rule.selector) continue;
 
-    var pathOnly = window.location.pathname.replace(/^\/|\/$/g, "");
-    var slug =
-      (pathOnly.split("/").pop() || "home")
-        .toLowerCase()
-        .replace(/[^a-z]/g, "_")
-        .replace(/_+/g, "_")
-        .replace(/^_|_$/g, "") || "home";
-
-    var text = (element.textContent || "")
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z]/g, "_")
-      .replace(/_+/g, "_")
-      .replace(/^_|_$/g, "")
-      .slice(0, 25);
-    var id = (element.id || "")
-      .toLowerCase()
-      .replace(/[^a-z]/g, "_")
-      .replace(/_+/g, "_")
-      .replace(/^_|_$/g, "")
-      .slice(0, 25);
-    var cls =
-      element.classList && element.classList[0]
-        ? element.classList[0]
-            .toLowerCase()
-            .replace(/[^a-z]/g, "_")
-            .replace(/_+/g, "_")
-            .replace(/^_|_$/g, "")
-        : "";
-
-    var hints = [text, id, cls].filter(Boolean);
-
-    for (var i = 0; i < variables.length; i++) {
-      var vname = variables[i].name || "";
-      if (!vname.startsWith(siteName + "_")) continue;
-      if (!vname.includes(slug)) continue;
-      for (var j = 0; j < hints.length; j++) {
-        if (hints[j] && vname.endsWith("_" + hints[j])) {
-          console.log(
-            '[CB] Match: "' + element.textContent.trim() + '" -> ' + vname,
-          );
-          return variables[i];
+      // Check if this element matches the rule selector
+      try {
+        var matched = document.querySelectorAll(rule.selector);
+        for (var j = 0; j < matched.length; j++) {
+          if (matched[j] === element) {
+            console.log(
+              '[CB] Match: "' +
+                element.textContent.trim() +
+                '" -> ' +
+                rule.cb_variable_name,
+            );
+            return rule;
+          }
         }
-      }
+      } catch (e) {}
     }
     return null;
   }
 
   // 4. Fire Trigger
   async function fireTrigger(variableName, consumerToken) {
+    if (!variableName) {
+      console.warn("[CB] No variable name");
+      return;
+    }
     console.log("[CB] Firing: " + variableName);
     var res = await fetch(BACKEND_URL + "/fire_trigger", {
       method: "POST",
@@ -180,7 +145,7 @@
           async function () {
             var matched = matchVariable(el, variables);
             if (!matched) return;
-            await fireTrigger(matched.name, consumerToken);
+            await fireTrigger(matched.cb_variable_name, consumerToken);
           },
           true,
         );
