@@ -97,7 +97,7 @@ def _scrape_pages(site_url: str) -> list[dict]:
         pages.append({"label": label, "url": full})
 
     # Priority 1 — nav, header, footer (most reliable navigation links)
-    NAV_TAGS = ["nav", "header", "footer" , "base"]
+    NAV_TAGS = ["nav", "header", "footer"]
     for container in soup.find_all(NAV_TAGS):
         for a in container.find_all("a", href=True):
             add_link(a)
@@ -317,16 +317,44 @@ def setup():
         return jsonify({"error": str(e)}), 500
 
 
+# Common files that often contain nav links
+NAV_FILES = [
+    "nav.html", "header.html", "footer.html",
+    "navigation.html", "navbar.html", "menu.html",
+    # Add more here if needed
+]
+
 @app.route("/extract_pages")
 def extract_pages():
-    """Return cached page list for a site."""
+    """
+    Return cached page list for a site.
+    Also tries common nav/header/footer files to find more links.
+    """
     site_url = request.args.get("site_url", "").strip()
     if not site_url:
         return jsonify({"error": "Missing site_url"}), 400
 
     if site_url not in _site_pages:
         try:
-            _site_pages[site_url] = _scrape_pages(site_url)
+            pages = _scrape_pages(site_url)
+
+            # Also try common nav files explicitly
+            base = site_url.rstrip("/")
+            for nav_file in NAV_FILES:
+                try:
+                    nav_url = f"{base}/{nav_file}"
+                    extra   = _scrape_pages(nav_url)
+                    # Add only new pages not already found
+                    existing_urls = {p["url"] for p in pages}
+                    for p in extra:
+                        if p["url"] not in existing_urls:
+                            pages.append(p)
+                            existing_urls.add(p["url"])
+                    print(f"Nav file {nav_file}: {len(extra)} links found")
+                except Exception:
+                    pass  # File doesn't exist — skip silently
+
+            _site_pages[site_url] = pages
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 

@@ -233,19 +233,25 @@ endblock %} {% set active = 'trigger' %} {% block content %}
     if (slug !== siteName) parts.push(slug);
     if (hint !== slug && hint !== siteName) parts.push(hint);
 
-    // Add context to make same-text buttons unique
-    var context = (sel ? sel.dataset.context || "" : "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "_")
-      .replace(/_+/g, "_")
-      .replace(/^_|_$/g, "")
-      .slice(0, 20);
-    if (context && parts.indexOf(context) === -1) parts.push(context);
+    // Add context — skip Webflow internal IDs (w-node-xxx patterns)
+    var rawCtx = sel ? sel.dataset.context || "" : "";
+    if (rawCtx && !/w.node|w_node|[a-f0-9]{6}/i.test(rawCtx)) {
+      var context = rawCtx
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_|_$/g, "")
+        .slice(0, 15);
+      if (context && parts.indexOf(context) === -1) parts.push(context);
+    }
 
-    document.getElementById("cb-var").value = parts
+    var varName = parts
       .join("_")
       .replace(/_+/g, "_")
-      .replace(/^_|_$/g, "");
+      .replace(/^_|_$/g, "")
+      .slice(0, 45)
+      .replace(/_$/g, "");
+    document.getElementById("cb-var").value = varName;
     updateTagsPreview();
   }
 
