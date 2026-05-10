@@ -208,8 +208,11 @@ endblock %} {% set active = 'trigger' %} {% block content %}
         .replace(/^_|_$/g, "");
       siteName = /^[a-z]/.test(raw) ? raw : "site";
       var pathOnly = parsed.pathname.replace(/^\/|\/$/g, "");
+      var rawSlug = pathOnly.split("/").pop() || "home";
+      if (!rawSlug || rawSlug.toLowerCase().startsWith("index"))
+        rawSlug = "home";
       slug =
-        (pathOnly.split("/").pop() || "home")
+        rawSlug
           .toLowerCase()
           .replace(/[^a-z]/g, "_")
           .replace(/_+/g, "_")
@@ -229,6 +232,16 @@ endblock %} {% set active = 'trigger' %} {% block content %}
     var parts = [siteName];
     if (slug !== siteName) parts.push(slug);
     if (hint !== slug && hint !== siteName) parts.push(hint);
+
+    // Add context to make same-text buttons unique
+    var context = (sel ? sel.dataset.context || "" : "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "")
+      .slice(0, 20);
+    if (context && parts.indexOf(context) === -1) parts.push(context);
+
     document.getElementById("cb-var").value = parts
       .join("_")
       .replace(/_+/g, "_")
@@ -310,6 +323,8 @@ endblock %} {% set active = 'trigger' %} {% block content %}
             (el.classes || "") +
             '" data-href="' +
             (el.href || "") +
+            '" data-context="' +
+            (el.context || "") +
             '">' +
             label +
             "</option>"

@@ -147,18 +147,25 @@ def _scrape_elements(page_url: str) -> list[dict]:
             else:
                 selector = f"{tag_name}:nth-of-type({same_before + 1})"
 
-        # Parent section context for disambiguation in dropdown
+        # Parent context — walk up tree until meaningful id or class found
         parent_context = ""
         for parent in tag.parents:
             if parent.name in ["section", "div", "article", "main", "header", "footer", "nav"]:
                 parent_id  = parent.get("id", "")
                 parent_cls = " ".join(parent.get("class", []))
-                if parent_id:
+                if parent_id and parent_id not in ("", "None"):
                     parent_context = parent_id
                     break
                 elif parent_cls:
-                    parent_context = parent_cls.split()[0]
-                    break
+                    # Pick first meaningful class (skip generic ones)
+                    skip = {"w-container", "container", "wrapper", "inner", "outer", "row", "col", "div"}
+                    cls_parts = parent_cls.split()
+                    for c in cls_parts:
+                        if c.lower() not in skip and len(c) > 2:
+                            parent_context = c
+                            break
+                    if parent_context:
+                        break
 
         elements.append({
             "tag":      tag_name,
@@ -189,8 +196,11 @@ def _suggest_variable_name(element: dict, page_url: str) -> str:
 
     # Page slug — sirf path ka last part
     path = parsed_url.path.strip("/")
-    slug = path.split("/")[-1] if path else "home"
-    slug = re.sub(r"[^a-z0-9]", "_", slug.lower()).strip("_") or "home"
+    raw_slug = path.split("/")[-1] if path else "home"
+    # index.html, index.php etc -> "home"
+    if not raw_slug or raw_slug.lower().startswith("index"):
+        raw_slug = "home"
+    slug = re.sub(r"[^a-z0-9]", "_", raw_slug.lower()).strip("_") or "home"
 
     # Element hint — text > id > first class > tag
     raw = (
@@ -208,6 +218,13 @@ def _suggest_variable_name(element: dict, page_url: str) -> str:
         parts.append(slug)
     if hint != slug and hint != site_name:
         parts.append(hint)
+
+    # Add context if available (makes same-text buttons unique)
+    context = element.get("context", "")
+    if context:
+        ctx_clean = re.sub(r"[^a-z0-9]", "_", context.lower()).strip("_")[:20]
+        if ctx_clean and ctx_clean not in parts:
+            parts.append(ctx_clean)
 
     name = "_".join(parts)
     name = re.sub(r"_+", "_", name).strip("_")
