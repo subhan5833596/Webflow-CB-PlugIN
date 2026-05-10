@@ -1,5 +1,6 @@
 /**
  * CentreBlock Webflow Tracker
+ * No rules needed — matches directly from CB variables
  */
 
 (function () {
@@ -15,8 +16,6 @@
     }
 
     var websiteDomain = window.location.host.replace(":", "_");
-    console.log("[CB] Fetching token for uuid:", websiteDomain);
-
     var res = await fetch(BACKEND_URL + "/get_consumer_token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -31,156 +30,122 @@
     var data = await res.json();
     if (data.token) {
       sessionStorage.setItem("_cb_token", data.token);
-      console.log("[CB] Token received:", data.token.slice(0, 20) + "...");
+      console.log("[CB] Token received");
       return data.token;
     }
     console.warn("[CB] Token failed:", data);
     return null;
   }
 
-  // 2. Fetch Rules
-  async function fetchRules() {
-    console.log("[CB] Fetching rules...");
-    var res = await fetch(BACKEND_URL + "/get_rules");
-    var rules = await res.json();
+  // 2. Fetch CB Variables — filter by site + current page
+  async function fetchVariables() {
+    var res = await fetch(BACKEND_URL + "/cb_variables");
+    var vars = await res.json();
+    if (!Array.isArray(vars)) {
+      console.warn("[CB] Variables error:", vars);
+      return [];
+    }
 
-    var currentHost = window.location.hostname.replace(/^www\./, "");
-    var currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
-    console.log("[CB] Current host:", currentHost, "| path:", currentPath);
+    // Site name from domain
+    var domain = window.location.hostname.replace(/^www\./, "");
+    var rawSite = domain
+      .split(".")[0]
+      .toLowerCase()
+      .replace(/[^a-z]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "");
+    var siteName = /^[a-z]/.test(rawSite) ? rawSite : "site";
 
-    var siteRules = rules.filter(function (r) {
-      if (!r.website_url) return false;
-      try {
-        var ruleHost = new URL(r.website_url).hostname.replace(/^www\./, "");
-        return ruleHost === currentHost;
-      } catch (e) {
-        return false;
-      }
+    // Page slug
+    var pathOnly = window.location.pathname.replace(/^\/|\/$/g, "");
+    var rawSlug = pathOnly.split("/").pop() || "home";
+    if (!rawSlug || rawSlug.toLowerCase().startsWith("index")) rawSlug = "home";
+    var slug =
+      rawSlug
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_|_$/g, "") || "home";
+
+    // Filter: site prefix + page slug in name
+    var prefix = siteName + "_";
+    var pageKey = siteName + "_" + slug + "_";
+
+    // Deduplicate by name (CSV returns one row per category)
+    var seen = {};
+    vars.forEach(function (v) {
+      if (v.name) seen[v.name] = v;
+    });
+    var unique = Object.values(seen);
+
+    var siteVars = unique.filter(function (v) {
+      return v.name && v.name.startsWith(prefix);
+    });
+    var pageVars = unique.filter(function (v) {
+      return v.name && v.name.startsWith(pageKey);
     });
 
+    console.log("[CB] Site:", siteName, "| Slug:", slug);
     console.log(
-      "[CB] Total rules:",
-      rules.length,
-      "| Site rules:",
-      siteRules.length,
+      "[CB] Total vars:",
+      vars.length,
+      "| Site vars:",
+      siteVars.length,
+      "| Page vars:",
+      pageVars.length,
     );
-    siteRules.forEach(function (r) {
-      console.log(
-        "[CB] Rule:",
-        r.cb_variable_name,
-        "| page:",
-        r.page_url,
-        "| selector:",
-        r.selector,
-        "| text:",
-        r.element_text,
-      );
+    pageVars.forEach(function (v) {
+      console.log("[CB]  -", v.name);
     });
-    return siteRules;
+
+    // Use page vars if available, else all site vars
+    return pageVars.length ? pageVars : siteVars;
   }
 
-  // 3. Match element
-  function matchRule(element, rules) {
-    var currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  // 3. Match clicked element to a variable
+  function matchVariable(element, variables) {
+    // Build hints from element
+    var text = (element.textContent || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "")
+      .slice(0, 30);
+    var id = (element.id || "")
+      .toLowerCase()
+      .replace(/[^a-z]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "")
+      .slice(0, 25);
+    var cls =
+      element.classList && element.classList[0]
+        ? element.classList[0]
+            .toLowerCase()
+            .replace(/[^a-z]/g, "_")
+            .replace(/_+/g, "_")
+            .replace(/^_|_$/g, "")
+        : "";
 
-    for (var i = 0; i < rules.length; i++) {
-      var rule = rules[i];
+    var hints = [text, id, cls].filter(Boolean);
+    console.log("[CB] Click hints:", hints);
 
-      // Page check
-      if (rule.page_url) {
-        try {
-          var rulePath =
-            new URL(rule.page_url).pathname.replace(/\/+$/, "") || "/";
-          if (rulePath !== currentPath) continue;
-        } catch (e) {
-          continue;
+    for (var i = 0; i < variables.length; i++) {
+      var vname = variables[i].name || "";
+      for (var j = 0; j < hints.length; j++) {
+        if (hints[j] && vname.endsWith("_" + hints[j])) {
+          console.log("[CB] MATCHED:", element.textContent.trim(), "->", vname);
+          return variables[i];
         }
-      }
-
-      var matched = false;
-
-      // Strategy 1: #id selector
-      if (rule.selector && rule.selector.startsWith("#")) {
-        try {
-          var el = document.querySelector(rule.selector);
-          if (el && el === element) matched = true;
-        } catch (e) {}
-      }
-
-      // Strategy 2: tag + text + class
-      if (!matched && rule.element_text && rule.element_tag) {
-        var elText = element.textContent.trim();
-        var elTag = element.tagName.toLowerCase();
-        if (
-          elTag === rule.element_tag.toLowerCase() &&
-          elText === rule.element_text.trim()
-        ) {
-          if (rule.element_classes) {
-            var ruleFirstClass = rule.element_classes.split(" ")[0];
-            if (element.classList.contains(ruleFirstClass)) matched = true;
-          } else {
-            matched = true;
-          }
-        }
-      }
-
-      // Strategy 3: nth-of-type manual count
-      if (!matched && rule.selector && !rule.selector.startsWith("#")) {
-        try {
-          var selectorBase = rule.selector
-            .replace(/:nth-of-type\(\d+\)/g, "")
-            .replace(/:nth-child\(\d+\)/g, "");
-          var nthMatch = rule.selector.match(/:nth-of-type\((\d+)\)/);
-          var nthIndex = nthMatch ? parseInt(nthMatch[1]) - 1 : -1;
-
-          if (nthIndex >= 0) {
-            var candidates = document.querySelectorAll(selectorBase);
-            console.log(
-              "[CB] Strategy 3 — selector:",
-              selectorBase,
-              "| nth:",
-              nthIndex,
-              "| found:",
-              candidates.length,
-              "elements",
-            );
-            if (candidates[nthIndex] && candidates[nthIndex] === element)
-              matched = true;
-          } else {
-            var els = document.querySelectorAll(selectorBase);
-            for (var k = 0; k < els.length; k++) {
-              if (els[k] === element) {
-                matched = true;
-                break;
-              }
-            }
-          }
-        } catch (e) {
-          console.warn("[CB] Strategy 3 error:", e);
-        }
-      }
-
-      if (matched) {
-        console.log(
-          "[CB] MATCHED:",
-          element.textContent.trim(),
-          "->",
-          rule.cb_variable_name,
-        );
-        return rule;
       }
     }
+    console.log("[CB] No match for:", element.textContent.trim().slice(0, 30));
     return null;
   }
 
   // 4. Fire Trigger
   async function fireTrigger(variableName, consumerToken) {
-    if (!variableName) {
-      console.warn("[CB] No variable name");
-      return;
-    }
-    console.log("[CB] Firing trigger:", variableName);
-
+    console.log("[CB] Firing:", variableName);
     var res = await fetch(BACKEND_URL + "/fire_trigger", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -191,29 +156,27 @@
         direction: "Neutral",
       }),
     });
-
     var data = await res.json().catch(function () {
       return {};
     });
-    if (res.ok)
-      console.log("[CB] Trigger fired successfully:", variableName, data);
+    if (res.ok) console.log("[CB] Trigger fired:", variableName, data);
     else console.warn("[CB] Trigger FAILED [" + res.status + "]:", data);
     return data;
   }
 
   // Main
   async function initTracker() {
-    console.log("[CB] Tracker initializing...");
+    console.log("[CB] Initializing...");
     try {
       var consumerToken = await fetchConsumerToken();
-      var rules = await fetchRules();
+      var variables = await fetchVariables();
 
       if (!consumerToken) {
         console.warn("[CB] No token — stopping");
         return;
       }
-      if (!rules.length) {
-        console.warn("[CB] No rules — stopping");
+      if (!variables.length) {
+        console.warn("[CB] No variables for this page");
         return;
       }
 
@@ -221,37 +184,26 @@
         "a, button, input[type=submit], input[type=button]",
       );
       console.log(
-        "[CB] Attaching listeners to",
+        "[CB] Ready —",
         clickables.length,
-        "elements for",
-        rules.length,
-        "rules",
+        "elements,",
+        variables.length,
+        "variables",
       );
 
       clickables.forEach(function (el) {
         el.addEventListener(
           "click",
           async function () {
-            console.log(
-              "[CB] Click detected on:",
-              el.tagName,
-              "|",
-              el.textContent.trim().slice(0, 30),
-            );
-            var matched = matchRule(el, rules);
-            if (!matched) {
-              console.log("[CB] No rule matched for this element");
-              return;
-            }
-            await fireTrigger(matched.cb_variable_name, consumerToken);
+            var matched = matchVariable(el, variables);
+            if (!matched) return;
+            await fireTrigger(matched.name, consumerToken);
           },
           true,
         );
       });
-
-      console.log("[CB] Tracker ready");
     } catch (err) {
-      console.error("[CB] Tracker error:", err);
+      console.error("[CB] Error:", err);
     }
   }
 
