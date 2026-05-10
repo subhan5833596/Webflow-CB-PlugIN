@@ -97,7 +97,7 @@ def _scrape_pages(site_url: str) -> list[dict]:
         pages.append({"label": label, "url": full})
 
     # Priority 1 — nav, header, footer (most reliable navigation links)
-    NAV_TAGS = ["nav", "header", "footer"]
+    NAV_TAGS = ["nav", "header", "footer" , "base"]
     for container in soup.find_all(NAV_TAGS):
         for a in container.find_all("a", href=True):
             add_link(a)
