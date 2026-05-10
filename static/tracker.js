@@ -133,7 +133,11 @@
     for (var i = 0; i < variables.length; i++) {
       var vname = variables[i].name || "";
       for (var j = 0; j < hints.length; j++) {
-        if (hints[j] && vname.endsWith("_" + hints[j])) {
+        if (
+          hints[j] &&
+          (vname.endsWith("_" + hints[j]) ||
+            vname.includes("_" + hints[j] + "_"))
+        ) {
           console.log("[CB] MATCHED:", element.textContent.trim(), "->", vname);
           return variables[i];
         }
