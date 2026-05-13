@@ -1,0 +1,13 @@
+{
+  "name": "centreblock-tracker-extension",
+  "version": "1.0.0",
+  "description": "Track Webflow visitor clicks to CentreBlock variables",
+  "scripts": {
+    "serve": "webflow extension serve",
+    "bundle": "webflow extension bundle",
+    "build": "echo 'No build step needed — public/ is already production-ready'"
+  },
+  "devDependencies": {
+    "@webflow/webflow-cli": "latest"
+  }
+}

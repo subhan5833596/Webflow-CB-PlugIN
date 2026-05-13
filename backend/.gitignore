@@ -1,0 +1,26 @@
+# Encrypted user data — NEVER commit
+server/data/
+*.tmp
+
+# The auto-generated storage key (production should use STORAGE_KEY env var instead)
+.storage_key
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,19 @@
+{
+  "name": "CentreBlock Tracker",
+  "shortDescription": "Track Webflow visitor clicks to CentreBlock variables.",
+  "homepage": "https://your-domain.example.com",
+  "apiVersion": "2.0.0",
+  "categories": ["Analytics", "Marketing"],
+  "scopes": [
+    "sites:read",
+    "pages:read"
+  ],
+  "size": "default",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "120x120"
+    }
+  ],
+  "publicUri": "https://your-domain.example.com/app"
+}

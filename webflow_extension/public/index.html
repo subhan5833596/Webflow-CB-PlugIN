@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CentreBlock Tracker</title>
+<link rel="stylesheet" href="./styles.css" />
+<!-- Webflow Designer Extension API — loaded by Webflow inside the iframe -->
+</head>
+<body>
+  <header class="topbar">
+    <h1>CentreBlock Tracker</h1>
+    <nav class="tabs">
+      <button data-view="setup"   class="tab active">Setup</button>
+      <button data-view="rules"   class="tab">Rules</button>
+      <button data-view="install" class="tab">Install</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ─────────── SETUP VIEW ─────────── -->
+    <section id="view-setup" class="view active">
+      <h2>Connect this site to CentreBlock</h2>
+      <p class="muted">
+        Your CentreBlock customer secret is sent once to your server,
+        encrypted at rest, and never returned to this panel.
+      </p>
+
+      <div class="card" id="server-config-card">
+        <label>
+          Backend server URL
+          <input id="server-url" placeholder="https://your-server.onrender.com" />
+          <small class="muted">Where your CentreBlock add-on backend is deployed.</small>
+        </label>
+        <label>
+          Admin token (if your server has ADMIN_TOKEN set)
+          <input id="admin-token" type="password" placeholder="optional" />
+        </label>
+        <button id="save-config" class="btn primary">Save backend config</button>
+      </div>
+
+      <div id="sites-list" class="card-list"></div>
+
+      <form id="site-form" class="card form">
+        <h3 id="site-form-title">Add a new site</h3>
+        <input type="hidden" name="site_id" />
+        <label>
+          Display name
+          <input name="name" placeholder="My Webflow site" required />
+        </label>
+        <label>
+          Site origin (the published URL, without path)
+          <input name="origin" placeholder="https://my-site.webflow.io" required />
+        </label>
+        <label>
+          CentreBlock customer ID
+          <input name="cb_customer_id" type="number" placeholder="117" required />
+        </label>
+        <label>
+          CentreBlock customer secret
+          <input name="cb_secret" type="password"
+                 placeholder="paste secret — never shown again" />
+          <small class="muted">Leave blank when editing to keep existing secret.</small>
+        </label>
+        <div class="row">
+          <button type="submit" class="btn primary">Save</button>
+          <button type="button" id="site-form-cancel" class="btn ghost">Cancel</button>
+        </div>
+        <div class="status" id="site-status"></div>
+      </form>
+    </section>
+
+    <!-- ─────────── RULES VIEW ─────────── -->
+    <section id="view-rules" class="view">
+      <h2>Tracking rules</h2>
+
+      <div class="card">
+        <label>
+          Select a site
+          <select id="rules-site-select"></select>
+        </label>
+        <div class="row" style="margin-top:8px;">
+          <button id="discover-pages" class="btn">Discover pages</button>
+          <button id="reload-rules" class="btn ghost">Reload rules</button>
+        </div>
+      </div>
+
+      <div id="pages-card" class="card" hidden>
+        <h3>Pages found</h3>
+        <div id="pages-list" class="chip-list"></div>
+        <h3 id="elements-title" hidden>Elements on selected page</h3>
+        <div id="elements-list" class="elements"></div>
+      </div>
+
+      <div class="card">
+        <h3>Existing rules</h3>
+        <div id="rules-list" class="rule-list"></div>
+      </div>
+
+      <div class="status" id="rules-status"></div>
+    </section>
+
+    <!-- ─────────── INSTALL VIEW ─────────── -->
+    <section id="view-install" class="view">
+      <h2>Install the beacon on your Webflow site</h2>
+      <ol>
+        <li>Open your Webflow project's <strong>Site Settings → Custom Code</strong>.</li>
+        <li>In the <strong>Footer Code</strong> section, paste:</li>
+      </ol>
+      <pre id="beacon-snippet"><code>(configure backend URL in Setup first)</code></pre>
+      <p class="muted">
+        The beacon is "dumb" — it only reports clicked element selectors to your server.
+        No CentreBlock URL, secret, or variable name ever reaches the visitor's browser.
+      </p>
+      <p>3. Publish your Webflow site. Clicks will start flowing to CentreBlock immediately.</p>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
